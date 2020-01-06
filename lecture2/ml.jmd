@@ -1,0 +1,75 @@
+---
+title: Introduction to Julia for Scientific Machine Learning
+author: Chris Rackauckas
+date: January 6th, 2020
+---
+
+Let's start by discussing how to use Julia for machine learning from the
+context of scientific machine learning. The core of machine learning is the
+Universal Approximation Theroem (UAT) which states that any sufficiently nice
+function can be approximated by a sufficiently large nueral network. Since this
+is what we will be looking at in practice, let's get started with training
+neural networks to match functions instead of data.
+
+## Getting Started with Julia for Machine Learning
+
+To get started with Julia for machine learning, first we will need a Julia
+installation. I would recommend going to [https://julialang.org/downloads/](https://julialang.org/downloads/)
+and downloading the latest release. The generic Julia binaries use a patched
+version of the LLVM compiler which ensures all of the mathematical operations
+are correct. **Not all Linux distributions utilize the patched LLVM, so be careful
+if you are not using these binaries!**. The installation instructions describe
+how to download and set the path to the binaries, once that is done, the `julia`
+command should just work.
+
+I would next recommend getting an IDE up and running. For this I recommend the
+[Juno](https://junolab.org/) environment, whose installation instructions can
+be found at [http://docs.junolab.org/latest/man/installation/](http://docs.junolab.org/latest/man/installation/).
+An alternative is VSCode, where the [Julia VSCode plugin can be found at https://github.com/julia-vscode/julia-vscode](https://github.com/julia-vscode/julia-vscode).
+
+Once those are up and running, if you have access to a GPU you will likely want
+to download and install [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads).
+Just grab the latest version if you're using a newer graphics card (or check the
+compatibility of your graphics card). For using convolutional neural networks,
+we will want cudnn, which you install [from the cudnn website](https://developer.nvidia.com/cudnn).
+Note that part of the installation requires overwriting files from the CUDA
+installation: it looks a little hairy but that is the way to do it!
+
+Now that your installation is up and running, you'll want to grab a few Julia
+packages. For a listing of Julia packages, consult [pkg.julialang.org](https://pkg.julialang.org/docs/).
+For this course we will mainly be making use of:
+
+- DifferentialEquations.jl
+- Flux.jl
+- Zygote.jl
+- DiffEqFlux.jl
+- NeuralNetDiffEq.jl
+
+Those many others, such as ForwardDiff.jl or FiniteDiff.jl, will make an appearance.
+To add a package in Julia we will make use of the package REPL. To enter the
+package REPL mode, hit the `]` key. For help in the package REPL mode you can
+use `?` which will list commands. From this we can see there is an `add` command
+to add packages, so for example to add Flux.jl we would do:
+
+```julia;eval=false
+]add Flux
+```
+
+To then use the package we will then use the `using` command:
+
+```julia
+using Flux
+```
+
+If you prefer to namespace all commands (like is normally done in Python, i.e.
+`Flux.gradient` instead of `gradient`), you can use the command:
+
+```julia;eval=false
+import Flux
+```
+
+Note that the installation and precompilation of these packages will occur at
+the `add` and first `using` phases, so they may take awhile (subsequent uses
+will utilize the precompiled form and take a lot less time!)
+
+## Using Projects and Manifests
