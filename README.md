@@ -142,3 +142,44 @@ A brief overview of the topics is as follows:
 - Choices for gradient calculations: differences and understanding the appropriate
   methods to use
 - Writing good code for GPU acceleration
+
+## Lecture 1: Introduction to Scientific Machine Learning
+
+#### Lecture Notes
+
+- [What is Scientific Machine Learning?](https://mitmath.github.io/18S096SciML/lecture1/scientific_ml.pptx)
+
+#### Optional pre-reading materials
+
+- [The Essential Tools of Scientific Machine Learning](http://www.stochasticlifestyle.com/the-essential-tools-of-scientific-machine-learning-scientific-ml/)
+- [Workshop videos on Scientific Machine Learning](https://icerm.brown.edu/events/ht19-1-sml/)
+
+#### Summary
+
+We will start off by setting the stage for the course. The field of scientific
+machine learning and its span across computational science to applications in
+climate modeling and aerospace will be introduced. The methodologies that will be
+studied, in their various names, will be introduced, and the general formula that
+is arising in the discipline will be laid out: a mixture of scientific simulation
+tools like differential equations with machine learning primitives like neural
+networks, tied together through differentiable programming to achieve results
+that were previously not possible.
+
+Don't be worried if this introduction is fast: we'll be going back through
+each of these examples in detail, learning how to implement and use these methods.
+Today is mostly to introduce the motivation behind learning these methodologies.
+
+## Lecture 2: Introduction to Julia for Scientific Machine Learning
+
+##### Lecture Notes
+
+##### Optional pre-reading materials
+
+It may be a good idea to learn how to write efficient code. Here's a few materials
+along those lines:
+
+- [Optimizing Serial Code](https://mitmath.github.io/18337/lecture2/optimizing)
+- [Optimizing Your DiffEq Code](http://tutorials.juliadiffeq.org/html/introduction/03-optimizing_diffeq_code.html)
+- [Type-Dispatch Design: Post Object-Oriented Programming for Julia](http://www.stochasticlifestyle.com/type-dispatch-design-post-object-oriented-programming-julia/)
+- [Performance Matters](https://www.youtube.com/watch?v=r-TLSBdHe1A)
+- [You're doing it wrong (B-heaps vs Binary Heaps and Big O)](http://phk.freebsd.dk/B-Heap/queue.html)
