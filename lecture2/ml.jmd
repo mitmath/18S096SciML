@@ -73,3 +73,388 @@ the `add` and first `using` phases, so they may take awhile (subsequent uses
 will utilize the precompiled form and take a lot less time!)
 
 ## Using Projects and Manifests
+
+When doing a Julia project, it's is usually a good idea to create a project
+with a manifest file that tracks the version of all your packages. To do this
+we will first `activate` a project. Let's call this project `MLTest`, so we
+would do:
+
+```julia;eval=false
+]activate MLTest
+```
+
+Notice that this will create a folder in your current directly for oyur project.
+In this we will now add a few packages, for example:
+
+```julia;eval=false
+]add Flux DifferentialEquations DiffEqFlux
+```
+
+Notice that this will populate a `Project.toml` that lists the packages you have
+added, and a `Manifest.toml` which is the full list of packages in your environment.
+In the future, to get back to these same exact packages, you'd just have to
+re-activate the project.
+
+To make your scripts automatically re-activate your project, place the following
+at the top:
+
+```julia;eval=false
+cd(@__DIR__)
+using Pkg; Pkg.activate("."); Pkg.instantiate()
+```
+
+What this is doing is as follows. `cd(@__DIR__)` changes the current directory
+to the location of the script: this makes relative pathing work in your project,
+so `"."` would be the folder that the file is contained in. `using Pkg; Pkg.activate(".")`
+activates the `Manifest.toml` at the current location, which is the one for the
+project. `Pkg.instantiate()` then instantiates the packages, i.e. it will
+download and install the packages if they are missing. Thus a package setup with
+a Manifest and these lines of code on the top will automatically grab all of the
+same package versions on every computer, giving reproducible setups.
+
+## Julia Linear Algebra Through Neural Networks
+
+Julia is just like most other scripting languages which are used in scientific
+computing. Let's showcase how to do some linear algebra by defining a neural
+network. Recall that a neural network is a function:
+
+```math
+\text{NN}(x) = W_3\sigma_2(W_2\sigma_1(W_1x + b_1) + b2) + W_3
+```
+
+where we can change the number of layers (`(W_i,b_i)`) as necesary. Let's assume
+we want to approximate some $R^10 \rightarrow R^5$ function. To do this we need
+to make sure that we start with 10 inputs and arrive at 5 outputs. If we want a
+bigger middle layer for example, we can do something like (10,32,32,5). Size changing
+occurs at the site of the matrix multiplication, which means that we want a
+32x10 matrix, then a 32x32 matrix, and finally a 5x32 matrix. This neural network
+would look like:
+
+```julia
+W = [randn(32,10),randn(32,32),randn(5,32)]
+b = [zeros(32),zeros(32),zeros(5)]
+```
+
+```julia
+NN(x) = W[3]*tanh.(W[2]*tanh.(W[1]*x + b[1]) + b[2]) + b[3]
+NN(rand(10))
+```
+
+This is our direct definition of a neural network. Notice that we choose to use
+`tanh` as our **activation function** between the layers. In general we can choose
+any sufficiently nice activation function for a neural network to be a universal
+approximator (see UAT proofs for exact details on what must be satisfied).
+
+## Training Neural Networks with Flux.jl
+
+One of the main deep learning libraries in Julia is Flux.jl. Flux is an interesting
+library for scientific machine learning because it is built on top of language-wide
+**automatic differentiation** libraries, giving rise to a programming paradigm
+known as **differentiable programming**, which means that one can write a program
+in a manner that it has easily accessible fast derivatives.
+
+To learn how to use the library, consult the documentation. A Google search
+will bring up the [Flux.jl Github repository](https://github.com/FluxML/Flux.jl).
+From there, the blue link on the README brings you to
+[the package documentation](https://fluxml.ai/Flux.jl/stable/). This is common
+through Julia so it's a good habit to learn!
+
+In the documentation you will find that the way a neural network is defined
+is through a `Chain` of layers. A `Dense` layer is the kind we defined above,
+which is given by an input size, an output size, and an activation function.
+For example, the following recreates the neural network that we had above:
+
+```julia
+using Flux
+NN2 = Chain(Dense(10,32,tanh),
+           Dense(32,32,tanh),
+           Dense(32,5))
+NN(rand(10))
+```
+
+Notice that Flux.jl as a library is written in pure Julia, which means that every
+piece of this syntax is just sugar over some Julia code that we can specialize
+ourselves (this is the advantage of having a language fast enough for the
+implementation of the library and the use of the library!)
+
+For example, the activation function is just a scalar Julia function. If we wanted
+to replace it by something like the quadratic function, we can just use an
+**anonymous function** to define the scalar function we would like to use:
+
+```julia
+NN3 = Chain(Dense(10,32,x->x^2),
+            Dense(32,32,x->max(0,x)),
+            Dense(32,5))
+NN(rand(10))
+```
+
+The second activation function there is what's known as a `relu`. A `relu` can
+be good to use because it's an exceptionally operation and satisfies a form of
+the UAT. However, a downside is that its derivative is not continuous, which
+could impact the numerical properties of some algorithms, and thus it's widely
+used throughout standard machine learning but we'll see reasons why it may be
+disadvantageous in some cases in scientific machine learning.
+
+## Solving Differential Equations with DifferentialEquations.jl
+
+To solve differential equations in Julia, the library to use is
+[DifferentialEquations.jl](https://docs.juliadiffeq.org/latest/). Let's start
+by solving an ordinary differential equation. An ordinary differential equation
+is defined by the equation
+
+$$u'=f(u,p,t)$$
+
+where $u$ is the state, $p$ are the parameters, and $t$ is the independent
+variable which we will simply call time. The state can be a vector of states
+that are evolved simultaniously. For example, the Lotka-Volterra equations are
+defined by the following system:
+
+$$\begin{align}
+x' &= \alpha x - \beta x y\\
+y' &= -\delta y + \gamma x y \end{align}$$
+
+To define this system on an array in Julia, we have a 2-state equation where
+we interpret the first as $x$ and the second as $y$, which we then write as:
+
+```julia
+function lotka!(du,u,p,t)
+    x,y = u
+    α,β,γ,δ = p
+    du[1] = α*x - β*x*y
+    du[2] = -δ*y + γ*x*y
+end
+```
+
+Then we define our initial condition and some parameter values:
+
+```julia
+u0 = [1.0,1.0]
+p = [1.5,1.0,3.0,1.0]
+tspan = (0.0,10.0)
+```
+
+From this we define the `ODEProblem`, which is a collection of the system along
+with the initial condition, a time span to solve on, and the parameter values:
+
+```julia
+using DifferentialEquations, Plots
+prob = ODEProblem(lotka!,u0,tspan,p)
+sol = solve(prob)
+plot(sol)
+```
+
+One useful way to understand an ordinary differential equation is through its
+phase space plot, which is a plot of its state variables against each other.
+Here we plot `x` vs `y`:
+
+```julia
+plot(sol,vars=(1,2))
+```
+
+This showcases how the solution is truly cyclic, repeating after some finite
+time interval.
+
+## Optimizing Parameters of Differential Equations
+
+Now let's optimize the parameters of the differential equation system. To do
+this, let's first generate a dataset from the original parameters:
+
+```julia
+sol = solve(prob,saveat=0.1)
+data = Array(sol)
+```
+
+Here I am using the `saveat` keyword argument to tell the ODE solver to save at
+every 0.1 time points. Now let's define a cost function. Let's say we had a
+different set of parameters:
+
+```julia
+p = [1.6,1.4,2.0,0.8]
+_prob = remake(prob,p=p)
+sol = solve(_prob,saveat=0.1)
+plot(sol)
+scatter!(sol.t,data')
+```
+
+We would say that these parameters did not make the model fit the data well
+because the solution is very different from the data points, and this is what
+we encode as a **cost function**. Here, our cost function will be the distance
+between the data points and their true values, and thus the cost for a given
+parameter is:
+
+- Make a new problem with the new parameters
+- Solve the ODE with the new parameters
+- Compare the simulated data to the original data
+
+i.e.:
+
+```julia
+function lotka_cost(p)
+      _prob = remake(prob,u0=convert.(eltype(p),u0),p=p)
+      sol = solve(_prob,saveat=0.1,abstol=1e-10,reltol=1e-10,verbose=false)
+      sol.retcode !== :Success && return Inf
+      sqrt(sum(abs2,data - Array(sol)))
+end
+lotka_cost(p)
+```
+
+To double check that our loss makes sense, we note that we should have the value
+`0` when we check against the correct parameters since there is no noise in
+our data:
+
+```julia
+lotka_cost([1.5,1.0,3.0,1.0])
+```
+
+I lied! Note that there will be a small cost difference between we effectively
+added randomness due to the numerical error of the differential equation solver.
+(If we wanted to reduce / remove this, we can re-generate the data a very low
+tolerance!)
+
+To see if this works, let's perform an optimization to minimize the tolerance.
+For this optimization I will use the Optim.jl package:
+
+```julia
+using Optim
+res = Optim.optimize(lotka_cost,p,BFGS(),autodiff=:forward)
+```
+
+Now let's look at a few of the details hidden in that cost function. We first
+start out by changing the problem to be a new problem defined with the new
+parameters:
+
+```julia;eval=false
+_prob = remake(prob,u0=convert.(eltype(p),u0),p=p)
+```
+
+Do not worry about the `convert` syntax: we will describe this later when talking
+about automatic differentiation. Next, the ODE solver call was:
+
+```julia;eval=false
+sol = solve(_prob,saveat=0.1,abstol=1e-10,reltol=1e-10,verbose=false)
+```
+
+There's a few things to point out in there. For one, we set the tolerances much
+lower during the optimization as a way to ensure that our gradients would be
+accurate. This is important when using a local optimization technique on a
+scientific model because bad behavior with local optimizers can easily occur.
+Additionally, we are using `verbose=false` since every once in awhile the
+parameters will give a behavior that causes the rabbit population to explode.
+This is common in a lot of scientific models since, well, good behavior is only
+going to happen in the region between bifurcations. Due to this, we expect failures
+during optimization to occur, at which point we thrown `Inf` as the cost. We
+do this by checking the `retcode`, i.e. the return code of the ODE solver:
+
+```julia;eval=false
+sol.retcode !== :Success && return Inf
+```
+
+Together this gives a robust optimization to recover the original parameters!
+
+## Solving ODEs with Neural Networks
+
+Now let's get to our first true SciML application: solving ordinary differential
+equations with neural networks.
+
+### Background: A Method for Solving Ordinary Differential Equations with Neural Networks
+
+[This is a result due to Lagaris et. al from 1998](https://arxiv.org/pdf/physics/9705023.pdf).
+The idea is to solve differential equations using neural networks by
+representing the solution by a neural network and training the resulting
+network to satisfy the conditions required by the differential equation.
+
+Let's say we want to solve a system of ordinary differential equations
+
+$$u' = f(u,t)$$
+
+with $t \in [0,1]$ and a known initial condition $u(0)=u_0$. To solve this, we
+approximate the solution by a neural network:
+
+$$NN(t) \approx u(t)$$
+
+If $NN(t)$ was the true solution, then it would hold that $NN'(t) = f(NN(t),t)$ for
+all $t$. Thus we turn this condition into our loss function. This motivates the
+loss function:
+
+$$L(p) = \sum_i \left(\frac{dNN(t_i)}{dt} - f(NN(t_i),t_i) \right)^2$$
+
+The choice of $t_i$ could be done in many ways: it can be random, it can be a
+grid, etc. Anyways, when this loss function is minimized (gradients computed
+with standard reverse-mode automatic differentiation), then we have that
+$\frac{dNN(t_i)}{dt} \approx f(NN(t_i),t_i)$ and thus $NN(t)$ approximately solves
+the differential equation.
+
+#### Quick Question for Understanding: What is an effective way to compute dN/dt?
+
+If you thought reverse-mode automatic differentiation, go back and think about
+why that is incorrect! Hint: what is the dimensionality of the input and the
+output?
+
+Note that we still have to handle the initial condition. One simple way to do
+this is to add an initial condition term to the cost function. While that would
+work, it can be more efficient to encode the initial condition into the
+function itself so that it's trivially satisfied for any possible set of
+parameters. For example, instead of directly using a neural network, we can
+use:
+
+$$g(t) = u_0 + tNN(t)$$
+
+as our solution. Notice that this will always satisfy the initial condition,
+so if we train this to satisfy the derivative function then it will automatically
+be a solution to the derivative function.
+
+### Coding Up the Method
+
+Now let's implement this method with Flux. Let's define a neural network to be
+the `NN(t)` above. To make the problem easier, let's look at the ODE:
+
+$$u' = \cos 2\pi t$$
+
+and approximate it with the neural network from a scalar to a scalar:
+
+```julia
+using Flux
+NN = Chain(x -> [x],
+           Dense(1,32,tanh),
+           Dense(32,1),
+           first)
+NN(1.0)
+```
+
+Instead of directly approximating the neural network, we will use the transformed
+equation that is forced to satisfy the boundary conditions. Using `u0=0.0`, we
+have the function:
+
+```julia
+g(t) = t*NN(t) + 1.0
+```
+
+as our universal approximator. Thus, for this to be a function that satisfies
+
+$$g' = \cos 2\pi t$$
+
+we would need that:
+
+```julia
+using Statistics
+ϵ = sqrt(eps(Float32))
+loss() = mean(abs2(((g(t+ϵ)-g(t))/ϵ) - cos(2π*t)) for t in 0:0.01:1.0)
+```
+
+would be minimized.
+
+```julia
+opt = Flux.Descent(0.01)
+data = Iterators.repeated((), 5000)
+cb = function () #callback function to observe training
+  display(loss())
+end
+Flux.train!(loss, Flux.params(NN), data, opt; cb=cb)
+```
+
+```julia
+using Plots
+t = 0:0.001:1.0
+plot(t,Tracker.data.(first.(g.(t))),label="NN")
+plot!(t,1.0 .+ sin.(2π.*t)/2π, label = "True")
+```
