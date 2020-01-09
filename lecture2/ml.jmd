@@ -414,11 +414,11 @@ and approximate it with the neural network from a scalar to a scalar:
 
 ```julia
 using Flux
-NN = Chain(x -> [x],
+NNODE = Chain(x -> [x],
            Dense(1,32,tanh),
            Dense(32,1),
            first)
-NN(1.0)
+NNODE(1.0)
 ```
 
 Instead of directly approximating the neural network, we will use the transformed
@@ -426,7 +426,7 @@ equation that is forced to satisfy the boundary conditions. Using `u0=0.0`, we
 have the function:
 
 ```julia
-g(t) = t*NN(t) + 1.0
+g(t) = t*NNODE(t) + 1.0
 ```
 
 as our universal approximator. Thus, for this to be a function that satisfies
@@ -449,7 +449,7 @@ data = Iterators.repeated((), 5000)
 cb = function () #callback function to observe training
   display(loss())
 end
-Flux.train!(loss, Flux.params(NN), data, opt; cb=cb)
+Flux.train!(loss, Flux.params(NNODE), data, opt; cb=cb)
 ```
 
 ```julia

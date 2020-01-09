@@ -1,0 +1,731 @@
+---
+title: Partial Differential Equations and Stiffness
+author: Chris Rackauckas
+date: January 6th, 2020
+---
+
+Let's continue our previous discussion. Last time we established a relationship
+between recurrent neural networks and their continuous form, the neural ordinary
+differential equation. After doing so, we noticed that convolutional neural
+networks are directly related to the derivative operators of a partial differential
+equation. Now, let's see how we would mathematically handle partial differential
+equations numerically, and understand what kind of issues we should expect when
+using them as our underlying modeling tool.
+
+## Method of Lines Discretizations of Partial Differential Equations
+
+### The one-dimensional heat equation
+
+A method of lines discretization of a PDE is the transformation of that PDE
+into an ordinary differential equation. This is not a difficult process, in fact,
+it occurs simply when we leave one dimension of the PDE undiscretized. The
+canonical case for this is the heat equation, also known as the diffusion
+equation, given by the following PDE:
+
+```math
+u_t = \Delta u
+```
+
+In one dimension, this is $u_t = u_{xx}$. Recall from last time that the second
+order discretization of the second derivative is the operation
+
+$$\frac{u(x+\Delta x)-2u(x)+u(x-\Delta x)}{\Delta x^{2}}=u^{\prime\prime}(x)+\mathcal{O}\left(\Delta x^{2}\right).$$
+
+Thus to discretize our PDE, let's take our domain, say, $x \in [0,1]$, and split
+it up by $\Delta x$ pieces. Thus instead of solving for the full continuous
+$u(x)$ at a given time, we just want to know $u_i = u(x_i)$ at each $x_i = i \Delta x$.
+This transforms the continuous problem to solving for $U(t)$ which is the array
+of $u_i$ at a given time point.
+
+On this array, the second order central difference formula holds, which means
+that the second derivative operator can be written in terms of elements of our
+solution array:
+
+$$u_{xx} \approx \frac{u_{i-1} - 2 u_i + u_{i+1}}{\Delta x^2}$$
+
+and so we get the ODE system:
+
+$$u_i' = \frac{u_{i-1} - 2 u_i + u_{i+1}}{\Delta x^2}$$
+
+as our approximation to the PDE. We can also represent the operation as the
+tridiagonal matrix with [1 -2 1] down the diagonal, a matrix known as the
+Strang matrix, in which case we would have:
+
+$$U' = AU$$
+
+### Coding the one-dimensional heat equation
+
+Let's give ourselves some random initial condition:
+
+```julia
+n = 9
+u0 = randn(n) .+ 2.0
+```
+
+Now we define the ODE system:
+
+```julia
+function heat_1d(du,u,p,t)
+  dx2 = (1/(length(u)+1))^2
+  for i in 2:(length(u)-1)
+    du[i] = (u[i-1] - 2u[i] + u[i+1])/dx2
+  end
+  du[1] = (-2u[1] + u[2])/dx2
+  du[end] = (u[end-1] - 2u[end])/dx2
+end
+```
+
+Notice here that there was an extra little choice that was required: the
+**boundary condition**. With a convolutional stencil we always drop off the last
+values. In a partial differential equation, this is the choice to only solve on
+the interior and assume $u(0) = u(1) = 0$, which is known as the Dirichlet 0
+boundary condition. More generally we can choose specific values at the end point
+to represent sources and sinks. Another popular choice of boundary condition
+are the Neumann boundary conditions, where $u'(0) = a$ is some chosen value. A
+popular choice is what's known as the **no-flux boundary condition**, which is
+where $u'(0)=0$ which implies that none of the fluid is able to flow over the
+boundary (the advection at the boundary is zero).
+
+Here we are using Dirichlet zero boundary conditions, saying $u_0 = u_{n+1} = 0$.
+Now let's solve the ODE defined by this system and plot it over time:
+
+```julia
+using OrdinaryDiffEq
+prob = ODEProblem(heat_1d, u0, (0.0,0.5))
+sol = solve(prob,Tsit5(),saveat=0.05)
+
+using Plots
+plot(sol[1])
+plot!(sol[2])
+plot!(sol[3])
+plot!(sol[4])
+```
+
+Notice that the heat fluctuations quickly dampen out and then the heat is released
+from the system. This is because we do not have a source of heat and just have a
+way for it to leave our domain. Now let's say we have a source on the left hand
+side which is giving a value of 3, i.e. it's fixed at 30 degree celcius. We
+start with random heat in the room and let the thermal energy diffuse: how does
+the temperature at each part of the room change over time?
+
+```julia
+u0 = randn(n) .+ 2.0
+
+function heat_1d_d3(du,u,p,t)
+  dx2 = (1/(length(u)+1))^2
+  for i in 2:(length(u)-1)
+    du[i] = (u[i-1] - 2u[i] + u[i+1])/dx2
+  end
+  du[1] = (3.0 + -2u[1] + u[2])/dx2
+  du[end] = (u[end-1] - 2u[end])/dx2
+end
+
+prob = ODEProblem(heat_1d_d3, u0, (0.0,0.5))
+sol = solve(prob,Tsit5(),saveat=0.05)
+
+plot(sol[1])
+plot!(sol[2])
+plot!(sol[3])
+plot!(sol[4])
+```
+
+Notice that we evolve towards a gradient from the source to the sink (you can
+prove that after infinite time you have a straight line from the source to the
+sink!).
+
+### The two-dimensional heat equation
+
+Now let's say we have $u_t = \Delta u$ where $\Delta u = u_{xx} + u_{yy}$. In this
+case, we do the same discretization along the $x$ and $y$ to get the stencil
+
+```
+0  1 0
+1 -4 1
+0  1 0
+```
+
+derived in the last class. To implement this, we can use a matrix representation
+over time that we evolve, like:
+
+```julia
+n = 9
+u0 = randn(n,n) .+ 2.0
+
+function heat_2d(du,u,p,t)
+  dx2 = (1/(size(u,1)+1))^2
+  for i in 2:(size(u,1)-1), j in 2:(size(u,2)-1)
+    du[i,j] = (u[i-1,j] + u[i,j-1] - 4u[i,j] + u[i+1,j] + u[i,j+1])/dx2
+  end
+  for i in 2:(size(u,1)-1)
+    du[1,i] = (u[1,i-1] -4u[1,i] + u[2,i] + u[1,i+1])/dx2
+    du[i,1] = (u[i-1,1] -4u[i,1] + u[i,2] + u[i+1,1])/dx2
+    du[end,i] = (u[end-1,i] - 4u[end,i] + u[end,i+1] + u[end,i-1])/dx2
+    du[i,end] = (u[i,end-1] - 4u[i,end] + u[i+1,end] + u[i-1,end])/dx2
+  end
+
+  du[1,1] = (u[2,1] + u[1,2] - 4u[1,1])/dx2
+  du[1,end] = (u[2,end] + u[1,end-1] - 4u[1,end])/dx2
+  du[end,1] = (u[end,2] + u[end-1,1] - 4u[end,1])/dx2
+  du[end,end] = (u[end-1,1] + u[end,end-1] - 4u[end,end])/dx2
+end
+
+prob = ODEProblem(heat_2d, u0, (0.0,0.5))
+sol = solve(prob,Tsit5(),saveat=0.001)
+
+surface(sol[1])
+```
+
+```julia
+surface(sol[2])
+```
+
+```julia
+surface(sol[3])
+```
+
+```julia
+for i in 1:length(sol)
+  display(surface(sol[i],zlims = (0.0,3.0)))
+end
+```
+
+## Representation and Implementation of Stencil Operations
+
+### Stencil Operations as Sparse Matrices
+
+Stencil operations are linear operators, i.e. $S[x+\alpha y] = S[x] + \alpha S[y]$
+for any sufficiently nice stencil operation $S$ (note "sufficiently nice": there
+is a "stencil" operation mentioned in the convolutional neural networks section
+which was not linear: which operation was it?). Now we write these operators as
+matrices. Notice that for the vector:
+
+$$U=\left(\begin{array}{c}
+u_{1}\\
+\vdots\\
+u_{n}
+\end{array}\right),$$ we have that
+
+$$\delta_{+}U=\left(\begin{array}{c}
+u_{2}-u_{1}\\
+\vdots\\
+u_{n}-u_{n-1}
+\end{array}\right)$$
+
+and so
+
+$$\delta_{+}=\left(\begin{array}{ccccc}
+-1 & 1\\
+ & -1 & 1\\
+ &  & \ddots & \ddots\\
+ &  &  & -1 & 1
+\end{array}\right)$$
+
+We can do the same to understand the other operators. But notice something:
+this operator isn't square! In order for this to be square, in order to know
+what happens at the endpoint, we need to know the boundary conditions. I.e., an
+assumption on the value or derivative at $u(0)$ or $u(1)$ is required in order to
+get the first/last rows of the matrix!
+
+Similarly, $\delta_{0}^{2}$ can be represented as the tridiagonal matrix of
+`[1 -2 1]`, also known as the Strang matrix.
+
+Now let's think about the higher dimensional forms as a vector, i.e. `vec(u)`.
+In this case, what is the matrix `A` for which `reshape(A*vec(u),size(u)...)`
+performs the higher dimensional Laplacian, i.e. $u_{xx} + u_{yy}$? The
+answer is that it discretizes via Kronecker products to:
+
+$$A=I_{y}\otimes A_{x}+A_{y}\otimes I_{x}$$
+
+or:
+
+$$\frac{\partial^{2}}{\partial x^{2}}=\left(\begin{array}{cccc}
+A_{x}\\
+ & A_{x}\\
+ &  & \ddots\\
+ &  &  & A_{x}
+\end{array}\right)$$
+
+and
+
+$$\frac{\partial^{2}}{\partial y^{2}}=\left(\begin{array}{cccc}
+-2I_{x} & I_{x}\\
+I_{x} & -2I_{x} & I_{x}\\
+ &  & \ddots\\
+\\
+\end{array}\right)$$
+
+To see why this is the case, understand it again as the stencil operation
+
+```
+0  1 0
+1 -4 1
+0  1 0
+```
+
+In this operation, at a point you still use the up and down neighbors, and
+thus this has a tridiagonal form since those are the immediate neighbors, but
+the next $y$ value is $N$ over, so this is where the block tridiagonal form
+comes for the stencil in the $y$ terms. When these are added together one
+receives the appropriate matrix. The Kronecker product effectively encodes
+this "N over" behavior. It also readily generalizes to $N$ dimensions. To see
+this for 3-dimensional Laplacians, $u_{xx} + u_{yy} + u_{zz}$, notice that
+
+$$A=I_z \otimes I_{y}\otimes A_{x} + I_z \otimes A_{y}\otimes I_{x} + A_z \otimes A_y \otimes I_x$$
+
+using the same reasoning about "N" over and "N^2 over", and from this formulation
+it's clear how to generalize to arbitrary dimensions.
+
+We note that there is an alternative representation as well for 2D forms. We
+can represent them with left and right matrix operations. When $u$ is
+represented as a matrix, notice that
+
+$$A(u) = A_y u + u A_x$$
+
+where $A_y$ and $A_x$ are both the `[1 -2 1]` 1D tridiagonal stencil matrix,
+but by right multiplying it's occuring along the columns and left multiplying
+occurs along the rows. This then gives a semi-dense formulation of the stencil
+operation.
+
+### Implementation via Stencil Compilers
+
+Sparse matrix implementations of stencils are fairly inefficient given the way
+that sparse matrices are represented (lists of (i,j,v) pairs, which are then
+compressed into CSR or CSC formats). However, it moves in the right direction
+by noticing that the operation
+
+```
+u[i+1,j] + u[i,j+1] + u[i-1,j] + u[i,j-1] - 4u[i,j]
+```
+
+is an inefficient way to walk through the data. The reason is because `u[i,j+1]`
+is using values that are far away from `u[i,j]`, and thus they may not necessarily
+be in the cache.
+
+Thus what is generally used is a *stencil compiler* which generates functions
+for stencil operations. These work by dividing the tensor into blocks on which
+the stencil is applied, where the blocks are small enough to allow the cache
+lines to fit the future points. This is a very deep computational topic that
+is beyond the scope of this course. Note one of the main reasons why NVIDA's
+CUDA dominates machine learning is because of its `cudnn` library, which is
+a very efficient GPU stencil computation library that is specifically tuned
+to NVIDIA's GPUs.
+
+## Semilinear Partial Differential Equations
+
+### Single Semilinear PDEs
+
+Now let's look at the semilinear heat equation, also known as the
+**reaction diffusion equation**:
+
+$$u_t = \Delta u + f(u)$$
+
+Here we interpret $f$ to act locally. I.e., reactions can only occur at the
+point in space where the chemical is at. The Fisher-KPP equation is one where
+$f(u) = u(1-u)$. Let's change our previous solver to handle this equation:
+
+```julia
+n = 9
+u0 = randn(n,n) .+ 2.0
+
+function kpp_2d(du,u,p,t)
+  dx2 = (1/(size(u,1)+1))^2
+  for i in 2:(size(u,1)-1), j in 2:(size(u,2)-1)
+    du[i,j] = (u[i-1,j] + u[i,j-1] - 4u[i,j] + u[i+1,j] + u[i,j+1])/dx2 + u[i,j]*(1-u[i,j])
+  end
+  for i in 2:(size(u,1)-1)
+    du[1,i] = (u[1,i-1] -4u[1,i] + u[2,i] + u[1,i+1])/dx2 + u[1,i]*(1-u[1,i])
+    du[i,1] = (u[i-1,1] -4u[i,1] + u[i,2] + u[i+1,1])/dx2 + u[i,1]*(1-u[i,1])
+    du[end,i] = (u[end-1,i] - 4u[end,i] + u[end,i+1] + u[end,i-1])/dx2 + u[end,i]*(1-u[end,i])
+    du[i,end] = (u[i,end-1] - 4u[i,end] + u[i+1,end] + u[i-1,end])/dx2 + u[i,end]*(1-u[i,end])
+  end
+
+  du[1,1] = (u[2,1] + u[1,2] - 4u[1,1])/dx2 + u[1,1]*(1-u[1,1])
+  du[1,end] = (u[2,end] + u[1,end-1] - 4u[1,end])/dx2 + u[1,end]*(1-u[1,end])
+  du[end,1] = (u[end,2] + u[end-1,1] - 4u[end,1])/dx2 + u[end,1]*(1-u[end,1])
+  du[end,end] = (u[end-1,1] + u[end,end-1] - 4u[end,end])/dx2 + u[end,end]*(1-u[end,end])
+end
+
+prob = ODEProblem(kpp_2d, u0, (0.0,0.5))
+sol = solve(prob,Tsit5(),saveat=0.001)
+```
+
+```julia
+for i in 1:length(sol)
+  display(surface(sol[i],zlims = (0.0,3.0)))
+end
+```
+
+### Systems of Semilinear PDEs
+
+Now let's look at the Gierer-Meinhardt Reaction-Diffusion equation:
+
+$$
+\begin{align}
+u_t &= \Delta u + \frac{au^2}{v} + \bar{u} - \alpha u\\
+v_t &= \Delta v + a u^2 + \beta v
+\end{align}
+$$
+
+To handle systems of partial differential equations, we do the same steps as
+before to turn it derivative operators into stencils and thus turn PDEs into
+ODEs. In its discretized form, this is the ODE:
+
+$$
+\begin{align}
+du &= D_1 (A_y u + u A_x) + \frac{au^2}{v} + \bar{u} - \alpha u\\
+dv &= D_2 (A_y v + v A_x) + a u^2 + \beta v
+\end{align}
+$$
+
+where $u$, $v$, and $A$ are matrices. Here, we will use the simplified
+version where $A$ is the tridiagonal stencil $[1,-2,1]$, i.e. it's the 2D
+discretization of the LaPlacian. The native code would be something along
+the lines of:
+
+```julia
+# Generate the constants
+p = (1.0,1.0,1.0,10.0,0.001,100.0) # a,α,ubar,β,D1,D2
+N = 100
+using LinearAlgebra
+Ax = Array(Tridiagonal([1.0 for i in 1:N-1],[-2.0 for i in 1:N],[1.0 for i in 1:N-1]))
+Ay = copy(Ax)
+Ax[2,1] = 2.0
+Ax[end-1,end] = 2.0
+Ay[1,2] = 2.0
+Ay[end,end-1] = 2.0
+
+function basic_version!(dr,r,p,t)
+  a,α,ubar,β,D1,D2 = p
+  u = r[:,:,1]
+  v = r[:,:,2]
+  Du = D1*(Ay*u + u*Ax)
+  Dv = D2*(Ay*v + v*Ax)
+  dr[:,:,1] = Du .+ a.*u.*u./v .+ ubar .- α*u
+  dr[:,:,2] = Dv .+ a.*u.*u .- β*v
+end
+
+a,α,ubar,β,D1,D2 = p
+uss = (ubar+β)/α
+vss = (a/β)*uss^2
+r0 = zeros(100,100,2)
+r0[:,:,1] .= uss.+0.01.*rand.()
+r0[:,:,2] .= vss
+
+prob = ODEProblem(basic_version!,r0,(0.0,5.0),p)
+```
+
+Notice here that I am showing an implementation trick, where multiplication of a
+derivative operator on the left makes it act along columns while multiplication
+of a derivative operator on the right makes it act along rows.
+
+```julia
+sol = solve(prob,Tsit5(),save_everystep=false)
+surface(sol[1][:,:,1])
+```
+
+```julia
+surface(sol[end][:,:,1])
+```
+
+Notice how this is starting to be computationally difficult. Let's spend some
+time optimizing our solver.
+
+#### Optimizing a PDE Solve
+
+Let's use BenchmarkTools.jl to get a baseline on a short version:
+
+```julia
+using BenchmarkTools
+prob = ODEProblem(basic_version!,r0,(0.0,0.1),p)
+@btime solve(prob,Tsit5(),save_everystep=false)
+```
+
+The first thing that we can do is get rid of the slicing allocations. The operation `r[:,:,1]` creates a temporary array instead of a "view", i.e. a pointer to the already existing memory. To make it a view, add `@view`. Note that we have to be careful with views because they point to the same memory, and thus changing a view changes the original values:
+
+```julia
+A = rand(4)
+@show A
+B = @view A[1:3]
+B[2] = 2
+@show A
+```
+
+Notice that changing `B` changed `A`. This is something to be careful of, but at the same time we want to use this since we want to modify the output `dr`. Additionally, the last statement is a purely element-wise operation, and thus we can make use of broadcast fusion there. Let's rewrite `basic_version!` to ***avoid slicing allocations*** and to ***use broadcast fusion***:
+
+```julia
+function gm2!(dr,r,p,t)
+  a,α,ubar,β,D1,D2 = p
+  u = @view r[:,:,1]
+  v = @view r[:,:,2]
+  du = @view dr[:,:,1]
+  dv = @view dr[:,:,2]
+  Du = D1*(Ay*u + u*Ax)
+  Dv = D2*(Ay*v + v*Ax)
+  @. du = Du + a.*u.*u./v + ubar - α*u
+  @. dv = Dv + a.*u.*u - β*v
+end
+prob = ODEProblem(gm2!,r0,(0.0,0.1),p)
+@btime solve(prob,Tsit5())
+```
+
+Now, most of the allocations are taking place in `Du = D1*(Ay*u + u*Ax)` since those operations are vectorized and not mutating. We should instead replace the matrix multiplications with `mul!`. When doing so, we will need to have cache variables to write into. This looks like:
+
+```julia
+Ayu = zeros(N,N)
+uAx = zeros(N,N)
+Du = zeros(N,N)
+Ayv = zeros(N,N)
+vAx = zeros(N,N)
+Dv = zeros(N,N)
+function gm3!(dr,r,p,t)
+  a,α,ubar,β,D1,D2 = p
+  u = @view r[:,:,1]
+  v = @view r[:,:,2]
+  du = @view dr[:,:,1]
+  dv = @view dr[:,:,2]
+  mul!(Ayu,Ay,u)
+  mul!(uAx,u,Ax)
+  mul!(Ayv,Ay,v)
+  mul!(vAx,v,Ax)
+  @. Du = D1*(Ayu + uAx)
+  @. Dv = D2*(Ayv + vAx)
+  @. du = Du + a*u*u./v + ubar - α*u
+  @. dv = Dv + a*u*u - β*v
+end
+prob = ODEProblem(gm3!,r0,(0.0,0.1),p)
+@btime solve(prob,Tsit5())
+```
+
+But our temporary variables are global variables. We need to either declare the caches as `const` or localize them. We can localize them by adding them to the parameters, `p`. It's easier for the compiler to reason about local variables than global variables. ***Localizing variables helps to ensure type stability***.
+
+```julia
+p = (1.0,1.0,1.0,10.0,0.001,100.0,Ayu,uAx,Du,Ayv,vAx,Dv) # a,α,ubar,β,D1,D2
+function gm4!(dr,r,p,t)
+  a,α,ubar,β,D1,D2,Ayu,uAx,Du,Ayv,vAx,Dv = p
+  u = @view r[:,:,1]
+  v = @view r[:,:,2]
+  du = @view dr[:,:,1]
+  dv = @view dr[:,:,2]
+  mul!(Ayu,Ay,u)
+  mul!(uAx,u,Ax)
+  mul!(Ayv,Ay,v)
+  mul!(vAx,v,Ax)
+  @. Du = D1*(Ayu + uAx)
+  @. Dv = D2*(Ayv + vAx)
+  @. du = Du + a*u*u./v + ubar - α*u
+  @. dv = Dv + a*u*u - β*v
+end
+prob = ODEProblem(gm4!,r0,(0.0,0.1),p)
+@btime solve(prob,Tsit5())
+```
+
+We could then use the BLAS `gemmv` to optimize the matrix multiplications some more, but instead let's devectorize the stencil.
+
+```julia
+p = (1.0,1.0,1.0,10.0,0.001,100.0,N)
+function fast_gm!(du,u,p,t)
+  a,α,ubar,β,D1,D2,N = p
+
+  @inbounds for j in 2:N-1, i in 2:N-1
+    du[i,j,1] = D1*(u[i-1,j,1] + u[i+1,j,1] + u[i,j+1,1] + u[i,j-1,1] - 4u[i,j,1]) +
+              a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+  end
+
+  @inbounds for j in 2:N-1, i in 2:N-1
+    du[i,j,2] = D2*(u[i-1,j,2] + u[i+1,j,2] + u[i,j+1,2] + u[i,j-1,2] - 4u[i,j,2]) +
+            a*u[i,j,1]^2 - β*u[i,j,2]
+  end
+
+  @inbounds for j in 2:N-1
+    i = 1
+    du[1,j,1] = D1*(2u[i+1,j,1] + u[i,j+1,1] + u[i,j-1,1] - 4u[i,j,1]) +
+            a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+  end
+  @inbounds for j in 2:N-1
+    i = 1
+    du[1,j,2] = D2*(2u[i+1,j,2] + u[i,j+1,2] + u[i,j-1,2] - 4u[i,j,2]) +
+            a*u[i,j,1]^2 - β*u[i,j,2]
+  end
+  @inbounds for j in 2:N-1
+    i = N
+    du[end,j,1] = D1*(2u[i-1,j,1] + u[i,j+1,1] + u[i,j-1,1] - 4u[i,j,1]) +
+           a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+  end
+  @inbounds for j in 2:N-1
+    i = N
+    du[end,j,2] = D2*(2u[i-1,j,2] + u[i,j+1,2] + u[i,j-1,2] - 4u[i,j,2]) +
+           a*u[i,j,1]^2 - β*u[i,j,2]
+  end
+
+  @inbounds for i in 2:N-1
+    j = 1
+    du[i,1,1] = D1*(u[i-1,j,1] + u[i+1,j,1] + 2u[i,j+1,1] - 4u[i,j,1]) +
+              a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+  end
+  @inbounds for i in 2:N-1
+    j = 1
+    du[i,1,2] = D2*(u[i-1,j,2] + u[i+1,j,2] + 2u[i,j+1,2] - 4u[i,j,2]) +
+              a*u[i,j,1]^2 - β*u[i,j,2]
+  end
+  @inbounds for i in 2:N-1
+    j = N
+    du[i,end,1] = D1*(u[i-1,j,1] + u[i+1,j,1] + 2u[i,j-1,1] - 4u[i,j,1]) +
+             a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+  end
+  @inbounds for i in 2:N-1
+    j = N
+    du[i,end,2] = D2*(u[i-1,j,2] + u[i+1,j,2] + 2u[i,j-1,2] - 4u[i,j,2]) +
+             a*u[i,j,1]^2 - β*u[i,j,2]
+  end
+
+  @inbounds begin
+    i = 1; j = 1
+    du[1,1,1] = D1*(2u[i+1,j,1] + 2u[i,j+1,1] - 4u[i,j,1]) +
+              a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+    du[1,1,2] = D2*(2u[i+1,j,2] + 2u[i,j+1,2] - 4u[i,j,2]) +
+              a*u[i,j,1]^2 - β*u[i,j,2]
+
+    i = 1; j = N
+    du[1,N,1] = D1*(2u[i+1,j,1] + 2u[i,j-1,1] - 4u[i,j,1]) +
+             a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+    du[1,N,2] = D2*(2u[i+1,j,2] + 2u[i,j-1,2] - 4u[i,j,2]) +
+             a*u[i,j,1]^2 - β*u[i,j,2]
+
+    i = N; j = 1
+    du[N,1,1] = D1*(2u[i-1,j,1] + 2u[i,j+1,1] - 4u[i,j,1]) +
+             a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+    du[N,1,2] = D2*(2u[i-1,j,2] + 2u[i,j+1,2] - 4u[i,j,2]) +
+             a*u[i,j,1]^2 - β*u[i,j,2]
+
+    i = N; j = N
+    du[end,end,1] = D1*(2u[i-1,j,1] + 2u[i,j-1,1] - 4u[i,j,1]) +
+             a*u[i,j,1]^2/u[i,j,2] + ubar - α*u[i,j,1]
+    du[end,end,2] = D2*(2u[i-1,j,2] + 2u[i,j-1,2] - 4u[i,j,2]) +
+             a*u[i,j,1]^2 - β*u[i,j,2]
+   end
+end
+prob = ODEProblem(fast_gm!,r0,(0.0,0.1),p)
+@btime solve(prob,Tsit5())
+```
+
+So we're >10x faster than the original vectorized code by ensuring that all of
+the operations fully fuze and by removing all allocations.
+
+#### Optimizing the Choice of PDE Solver
+
+After we have optimized our code, we need to optimize our choice of PDE solver.
+It turns out that there are pretty fundamental properties of ODE-derived PDEs
+which can make standard Runge-Kutta methods, such as Tsit5, the Dormand-Prince
+5th order method (commonly referred to as dopri5), etc. all slow. This is the
+property of **stiffness**. To see the effect, let's move to an ODE solver which
+properly handles stiff equations.
+
+```julia
+prob = ODEProblem(fast_gm!,r0,(0.0,10.0),p)
+@btime solve(prob,Tsit5())
+```
+
+```julia
+using Sundials
+@btime solve(prob,CVODE_BDF(linear_solver=:GMRES))
+```
+
+Notice that here we changed to using the GMRES linear solver in order to take
+into account the sparsity of the Jacobian matrix. It turns out that many of these
+stiff-aware algorithms require the use of the Jacobian, and thus exploiting its
+sparsity can be fundamental to writing a solvable discretization.
+
+This gave us a whopping 70x additional speedup! Let's look mathematicallly why
+this is the case.
+
+### Stability of a Method
+
+Simply having an order on the truncation error does not imply convergence of the
+method. The disconnect is that the errors at a given time point may not dissipate.
+What also needs to be checked is the asymtopic behavior of a disturbance. To
+see this, one can utilize the linear test problem:
+
+$$u' = \alpha u$$
+
+and ask the question, does the discrete dynamical system defined by the
+discretized ODE end up going to zero? You would hope that the discretized
+dynamical system and the continuous dynamical system have the same properties
+in this simple case, and this is known as linear stability analysis of the
+method.
+
+As an example, take a look at the Euler method. Recall that the Euler method
+was given by:
+
+$$u_{n+1} = u_n + \Delta t f(u_n,p,t)$$
+
+When we plug in the linear test equation, we get that
+
+$$u_{n+1} = u_n + \Delta t \alpha u_n$$
+
+If we let $z = \Delta t \alpha$, then we get the following:
+
+$$u_{n+1} = u_n + z u_n = (1+z)u_n$$
+
+which is stable when $z$ is in the shifted unit circle. This means that, as a
+necessary condition, the step size $\Delta t$ needs to be small enough that
+$z$ satisfies this condition, placing a stepsize limit on the method.
+
+### Interpretation of the Linear Stability Condition
+
+To interpret the linear stability condition, recall that the linearization of
+a system interprets the dynamics as locally being due to the Jacobian of the
+system. Thus
+
+$$u' = f(u,p,t)$$
+
+is locally equivalent to:
+
+$$u' = \frac{df}{du}u$$
+
+You can understand the local behavior through diagonalizing this matrix. Therefore,
+the scalar for the linear stability analysis is performing an analysis on the
+eigenvalues of the Jacobian. The method will be stable if the largest eigenvalues
+of df/du are all within the stability limit. This means that stability effects
+different
+
+### Implicit Methods
+
+If instead of the Euler method we defined $f$ to be evaluated at the future
+point, we would receive a method like:
+
+$$u_{n+1} = u_n + \Delta t f(u_{n+1},p,t+\Delta t)$$
+
+in which case, for the stability calculation we would have that
+
+$$u_{n+1} = u_n + \Delta t \alpha u_n$$
+
+or
+
+$$(1-z) u_{n+1} = u_n$$
+
+which means that
+
+$$u_{n+1} = \frac{1}{1-z} u_n$$
+
+which is stable for all $Re(z) < 0$ a property which is known as A-stability.
+It is also stable as $z \rightarrow \infty$, a property known as L-stability.
+This means that for equations with very ill-conditioned Jacobians, this method
+is still able to be use reasonably large stepsizes and can thus be efficient.
+
+### Stiffness and Timescale Separation
+
+From this we see that there is a maximal stepsize whenever the eigenvalues
+of the Jacobian are sufficiently large. It turns out that's not an issue if
+the phonomena we fast to see is fast, since then the total integration time
+tends to be small. However, is we have some equations with both fast modes
+and slow modes, like the Robertson equation, then it is very difficult because
+in order to resolve the slow dynamics over a long timespan, one needs to ensure
+that the fast dynamics do not diverge. This is a property known as stiffness.
+Stiffness can thus be approximated in some sense by the condition number of
+the Jacobian. The condition number of a matrix is its maximal eigenvalue divided
+by its minimal eigenvalue and gives an rough measure of the local timescale
+separations. If this value is large and one wants to resolve the slow dynamics,
+then explict integrators, like the explicit Runge-Kutta methods described before,
+have issues with stability. In this case implicit integrators (or other forms
+of stabilized stepping) are required in order to efficiently reach the end
+time step.
