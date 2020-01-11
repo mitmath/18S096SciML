@@ -62,9 +62,9 @@ using Plots
 plot(sol)
 ```
 
-Next we define a "single layer neural network" that uses the `diffeq_adjoint` layer
+Next we define a "single layer neural network" that uses the `concrete_solve`
 function that takes the parameters and returns the solution of the `x(t)`
-variable. `diffeq_adjoint` is a function over the DifferentialEquations `solve`
+variable. `concrete_solve` is a function over the DifferentialEquations `solve`
 that is used to signify which backpropogation algorithm to use to calculate the
 gradient. It is a function of the parameters (and optionally one can pass an
 initial condition). We use it as follows:
@@ -74,7 +74,7 @@ using Flux, DiffEqFlux
 p = [2.2, 1.0, 2.0, 0.4] # Initial Parameter Vector
 
 function predict_adjoint() # Our 1-layer neural network
-  diffeq_adjoint(p,prob,Tsit5(),saveat=0.1,abstol=1e-6,reltol=1e-5)
+  Array(concrete_solve(prob,Tsit5(),u0,p,saveat=0.1,abstol=1e-6,reltol=1e-5))
 end
 ```
 
@@ -87,11 +87,15 @@ loss_adjoint() = sum(abs2,predict_adjoint() - test_data)
 ```
 
 ```julia
+iter = 0
 cb = function () #callback function to observe training
-  display(loss_adjoint())
-  # using `remake` to re-create our `prob` with current parameters `p`
-  pl = plot(solve(remake(prob,p=p),Tsit5(),saveat=0.0:0.1:10.0),lw=5,ylim=(0,8))
-  display(scatter!(pl,0.0:0.1:10.0,test_data',markersize=2))
+  global iter += 1
+  if iter % 50 == 0
+    display(loss_adjoint())
+    # using `remake` to re-create our `prob` with current parameters `p`
+    pl = plot(solve(remake(prob,p=p),Tsit5(),saveat=0.0:0.1:10.0),lw=5,ylim=(0,8))
+    display(scatter!(pl,0.0:0.1:10.0,test_data',markersize=2))
+  end
 end
 
 # Display the ODE with the initial parameter values.
@@ -99,7 +103,7 @@ cb()
 
 p = [2.2, 1.0, 2.0, 0.4]
 
-data = Iterators.repeated((), 100)
+data = Iterators.repeated((), 300)
 opt = ADAM(0.1)
 Flux.train!(loss_adjoint, Flux.params(p), data, opt, cb = cb)
 ```
@@ -107,7 +111,7 @@ Flux.train!(loss_adjoint, Flux.params(p), data, opt, cb = cb)
 and then use gradient descent to force monotone convergence:
 
 ```julia
-data = Iterators.repeated((), 100)
+data = Iterators.repeated((), 300)
 opt = Descent(0.00001)
 Flux.train!(loss_adjoint, Flux.params(p), data, opt, cb = cb)
 ```
@@ -161,19 +165,23 @@ the neural network to discover the ODE:
 
 ```julia
 function predict_n_ode()
-  diffeq_adjoint(p,prob,Tsit5(),saveat=t)
+  Array(concrete_solve(prob,Tsit5(),u0,p,saveat=t))
 end
 loss_n_ode() = sum(abs2,ode_data .- predict_n_ode())
 
-data = Iterators.repeated((), 1000)
+data = Iterators.repeated((), 300)
 opt = ADAM(0.1)
+iter = 0
 cb = function () #callback function to observe training
-  display(loss_n_ode())
-  # plot current prediction against data
-  cur_pred = predict_n_ode()
-  pl = scatter(t,ode_data[1,:],label="data")
-  scatter!(pl,t,cur_pred[1,:],label="prediction")
-  display(plot(pl))
+  global iter += 1
+  if iter % 50 == 0
+    display(loss_n_ode())
+    # plot current prediction against data
+    cur_pred = predict_n_ode()
+    pl = scatter(t,ode_data[1,:],label="data")
+    scatter!(pl,t,cur_pred[1,:],label="prediction")
+    display(plot(pl))
+  end
 end
 
 # Display the ODE with the initial parameter values.
@@ -248,23 +256,27 @@ function dudt_(du,u,p,t)
     du[2] = p[end-1]*y + p[end]*x
 end
 prob = ODEProblem(dudt_,u0,tspan,p3)
-diffeq_adjoint(p3,prob,Tsit5(),u0=u0,abstol=1e-8,reltol=1e-6)
+concrete_solve(prob,Tsit5(),u0,p3,abstol=1e-8,reltol=1e-6)
 ```
 
 and we can train the system to be stable at 1 as follows:
 
 ```julia
 function predict_adjoint()
-  diffeq_adjoint(p3,prob,Tsit5(),u0=u0,saveat=0.0:0.1:25.0)
+  Array(concrete_solve(prob,Tsit5(),u0,p3,saveat=0.0:0.1:25.0))
 end
 loss_adjoint() = sum(abs2,x-1 for x in predict_adjoint())
 loss_adjoint()
 
-data = Iterators.repeated((), 100)
+data = Iterators.repeated((), 300)
 opt = ADAM(0.01)
+iter = 0
 cb = function ()
-  display(loss_adjoint())
-  display(plot(solve(remake(prob,p=p3,u0=u0),Tsit5(),saveat=0.1),ylim=(0,6)))
+  global iter += 1
+  if iter % 50 == 0
+    display(loss_adjoint())
+    display(plot(solve(remake(prob,p=p3,u0=u0),Tsit5(),saveat=0.1),ylim=(0,6)))
+  end
 end
 
 # Display the ODE with the current parameter values.
@@ -272,8 +284,6 @@ cb()
 
 Flux.train!(loss_adjoint, ps, data, opt, cb = cb)
 ```
-
-#### Nonlinear Optimal Control as a Universal Ordinary Differential Equation
 
 ## Partial Differential Equations and Convolutions
 

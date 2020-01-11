@@ -426,7 +426,7 @@ equation that is forced to satisfy the boundary conditions. Using `u0=0.0`, we
 have the function:
 
 ```julia
-g(t) = t*NNODE(t) + 1.0
+g(t) = t*NNODE(t) + 1f0
 ```
 
 as our universal approximator. Thus, for this to be a function that satisfies
@@ -438,7 +438,7 @@ we would need that:
 ```julia
 using Statistics
 ϵ = sqrt(eps(Float32))
-loss() = mean(abs2(((g(t+ϵ)-g(t))/ϵ) - cos(2π*t)) for t in 0:0.01:1.0)
+loss() = mean(abs2(((g(t+ϵ)-g(t))/ϵ) - cos(2π*t)) for t in 0:1f-2:1f0)
 ```
 
 would be minimized.
@@ -446,15 +446,20 @@ would be minimized.
 ```julia
 opt = Flux.Descent(0.01)
 data = Iterators.repeated((), 5000)
+iter = 0
 cb = function () #callback function to observe training
-  display(loss())
+  global iter += 1
+  if iter % 500 == 0
+    display(loss())
+  end
 end
+display(loss())
 Flux.train!(loss, Flux.params(NNODE), data, opt; cb=cb)
 ```
 
 ```julia
 using Plots
 t = 0:0.001:1.0
-plot(t,Tracker.data.(first.(g.(t))),label="NN")
+plot(t,g.(t),label="NN")
 plot!(t,1.0 .+ sin.(2π.*t)/2π, label = "True")
 ```

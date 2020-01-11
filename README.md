@@ -173,7 +173,12 @@ Today is mostly to introduce the motivation behind learning these methodologies.
 
 ##### Lecture Notes
 
+- [Introduction to Julia for Scientific Machine Learning](https://mitmath.github.io/18337/lecture2/ml)
+
 ##### Optional pre-reading materials
+
+- [DifferentialEquations.jl Documentation](https://docs.juliadiffeq.org/dev/)
+- [Flux.jl Documentation](https://fluxml.ai/Flux.jl/stable/)
 
 It may be a good idea to learn how to write efficient code. Here's a few materials
 along those lines:
@@ -183,3 +188,55 @@ along those lines:
 - [Type-Dispatch Design: Post Object-Oriented Programming for Julia](http://www.stochasticlifestyle.com/type-dispatch-design-post-object-oriented-programming-julia/)
 - [Performance Matters](https://www.youtube.com/watch?v=r-TLSBdHe1A)
 - [You're doing it wrong (B-heaps vs Binary Heaps and Big O)](http://phk.freebsd.dk/B-Heap/queue.html)
+
+#### Summary
+
+In this lecture we start digging into the Julia programming language for
+scientific computing and machine learning. Using the Flux.jl deep learning
+and DifferentialEquations.jl differential equation solver libraries, we look
+at how to do basic tasks like define and train neural networks, along with
+fitting parameters in a differential equation.
+
+## Lecture 3: Mixing Differential Equations and Machine Learning
+
+##### Lecture Notes
+
+- [Mixing Differential Equations and Machine Learning](https://mitmath.github.io/18337/lecture3/diffeq_ml)
+
+##### Optional pre-reading materials
+
+- [DiffEqFlux.jl README](https://github.com/JuliaDiffEq/DiffEqFlux.jl)
+- [DiffEqFlux Blog Post](https://julialang.org/blog/2019/01/fluxdiffeq)
+- [Essential Tools of Scientific Machine Learning](https://www.stochasticlifestyle.com/the-essential-tools-of-scientific-machine-learning-scientific-ml/)
+
+##### Summary
+
+In this lecture we start using the available tools to "do" scientific machine learning.
+This includes tasks like solving ordinary differential equations with neural
+networks, training neural ordinary differential equations, and training universal
+differential equations. We also look into the connection between convolutional
+neural networks and partial differential equations in order to establish an
+equivalence between the stencil operations in the two disciplines, and use this
+as a way to interpret trained equations.
+
+## Lecture 4: Numerically Solving Partial Differential Equations
+
+##### Lecture Notes
+
+- [Numerically Solving Partial Differential Equations](https://mitmath.github.io/18337/lecture4/pde_stiff)
+
+##### Optional pre-reading materials
+
+- [Optimizing Your DiffEq Code](https://tutorials.juliadiffeq.org/html/introduction/03-optimizing_diffeq_code.html)
+- [Solving Stiff Equations](https://docs.juliadiffeq.org/latest/tutorials/advanced_ode_example/)
+- [The Method of Lines (MOL) PDE Benchmarks from DiffEqBenchmarks.jl](https://github.com/JuliaDiffEq/DiffEqBenchmarks.jl)
+
+#### Summary
+
+Last time we ended with the relation between convolutional neural networks and
+PDEs. Given this relationship, and the general importance of PDEs in scientific
+models, we look into how to numerically solve partial differential equations.
+In these lectures we show how to discretize PDEs to turn them into ODEs, and then
+write code that gives optimized fast PDE solves. We end by noticing that the
+ODE solver choice can have a large effect on PDE performance, something that we
+will investigate in the following lecture.

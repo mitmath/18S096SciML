@@ -1,5 +1,5 @@
 ---
-title: Partial Differential Equations and Stiffness
+title: Numerically Solving Partial Differential Equations
 author: Chris Rackauckas
 date: January 6th, 2020
 ---
@@ -99,6 +99,7 @@ plot(sol[1])
 plot!(sol[2])
 plot!(sol[3])
 plot!(sol[4])
+plot!(sol[10])
 ```
 
 Notice that the heat fluctuations quickly dampen out and then the heat is released
@@ -169,7 +170,7 @@ function heat_2d(du,u,p,t)
   du[end,end] = (u[end-1,1] + u[end,end-1] - 4u[end,end])/dx2
 end
 
-prob = ODEProblem(heat_2d, u0, (0.0,0.5))
+prob = ODEProblem(heat_2d, u0, (0.0,0.01))
 sol = solve(prob,Tsit5(),saveat=0.001)
 
 surface(sol[1])
@@ -345,8 +346,8 @@ function kpp_2d(du,u,p,t)
   du[end,end] = (u[end-1,1] + u[end,end-1] - 4u[end,end])/dx2 + u[end,end]*(1-u[end,end])
 end
 
-prob = ODEProblem(kpp_2d, u0, (0.0,0.5))
-sol = solve(prob,Tsit5(),saveat=0.001)
+prob = ODEProblem(kpp_2d, u0, (0.0,0.01))
+sol = solve(prob,Tsit5(),saveat=0.001);
 ```
 
 ```julia
@@ -419,7 +420,7 @@ derivative operator on the left makes it act along columns while multiplication
 of a derivative operator on the right makes it act along rows.
 
 ```julia
-sol = solve(prob,Tsit5(),save_everystep=false)
+sol = solve(prob,Tsit5(),save_everystep=false);
 surface(sol[1][:,:,1])
 ```
 
@@ -437,7 +438,7 @@ Let's use BenchmarkTools.jl to get a baseline on a short version:
 ```julia
 using BenchmarkTools
 prob = ODEProblem(basic_version!,r0,(0.0,0.1),p)
-@btime solve(prob,Tsit5(),save_everystep=false)
+@btime solve(prob,Tsit5(),save_everystep=false);
 ```
 
 The first thing that we can do is get rid of the slicing allocations. The operation `r[:,:,1]` creates a temporary array instead of a "view", i.e. a pointer to the already existing memory. To make it a view, add `@view`. Note that we have to be careful with views because they point to the same memory, and thus changing a view changes the original values:
@@ -461,11 +462,11 @@ function gm2!(dr,r,p,t)
   dv = @view dr[:,:,2]
   Du = D1*(Ay*u + u*Ax)
   Dv = D2*(Ay*v + v*Ax)
-  @. du = Du + a.*u.*u./v + ubar - α*u
-  @. dv = Dv + a.*u.*u - β*v
+  @. du = Du + a*u*u/v + ubar - α*u
+  @. dv = Dv + a*u*u - β*v
 end
 prob = ODEProblem(gm2!,r0,(0.0,0.1),p)
-@btime solve(prob,Tsit5())
+@btime solve(prob,Tsit5(),save_everystep=false);
 ```
 
 Now, most of the allocations are taking place in `Du = D1*(Ay*u + u*Ax)` since those operations are vectorized and not mutating. We should instead replace the matrix multiplications with `mul!`. When doing so, we will need to have cache variables to write into. This looks like:
@@ -487,13 +488,11 @@ function gm3!(dr,r,p,t)
   mul!(uAx,u,Ax)
   mul!(Ayv,Ay,v)
   mul!(vAx,v,Ax)
-  @. Du = D1*(Ayu + uAx)
-  @. Dv = D2*(Ayv + vAx)
-  @. du = Du + a*u*u./v + ubar - α*u
-  @. dv = Dv + a*u*u - β*v
+  @. du = D1*(Ayu + uAx) + a*u*u./v + ubar - α*u
+  @. dv = D2*(Ayv + vAx) + a*u*u - β*v
 end
 prob = ODEProblem(gm3!,r0,(0.0,0.1),p)
-@btime solve(prob,Tsit5())
+@btime solve(prob,Tsit5(),save_everystep=false);
 ```
 
 But our temporary variables are global variables. We need to either declare the caches as `const` or localize them. We can localize them by adding them to the parameters, `p`. It's easier for the compiler to reason about local variables than global variables. ***Localizing variables helps to ensure type stability***.
@@ -516,7 +515,7 @@ function gm4!(dr,r,p,t)
   @. dv = Dv + a*u*u - β*v
 end
 prob = ODEProblem(gm4!,r0,(0.0,0.1),p)
-@btime solve(prob,Tsit5())
+@btime solve(prob,Tsit5(),save_everystep=false);
 ```
 
 We could then use the BLAS `gemmv` to optimize the matrix multiplications some more, but instead let's devectorize the stencil.
@@ -605,7 +604,7 @@ function fast_gm!(du,u,p,t)
    end
 end
 prob = ODEProblem(fast_gm!,r0,(0.0,0.1),p)
-@btime solve(prob,Tsit5())
+@btime solve(prob,Tsit5(),save_everystep=false);
 ```
 
 So we're >10x faster than the original vectorized code by ensuring that all of
@@ -620,14 +619,16 @@ which can make standard Runge-Kutta methods, such as Tsit5, the Dormand-Prince
 property of **stiffness**. To see the effect, let's move to an ODE solver which
 properly handles stiff equations.
 
+On an enlarged timespan we can see this as a big effect:
+
 ```julia
 prob = ODEProblem(fast_gm!,r0,(0.0,10.0),p)
-@btime solve(prob,Tsit5())
+@btime solve(prob,Tsit5(),save_everystep=false);
 ```
 
 ```julia
 using Sundials
-@btime solve(prob,CVODE_BDF(linear_solver=:GMRES))
+@btime solve(prob,CVODE_BDF(linear_solver=:GMRES),save_everystep=false);
 ```
 
 Notice that here we changed to using the GMRES linear solver in order to take
@@ -635,97 +636,5 @@ into account the sparsity of the Jacobian matrix. It turns out that many of thes
 stiff-aware algorithms require the use of the Jacobian, and thus exploiting its
 sparsity can be fundamental to writing a solvable discretization.
 
-This gave us a whopping 70x additional speedup! Let's look mathematicallly why
-this is the case.
-
-### Stability of a Method
-
-Simply having an order on the truncation error does not imply convergence of the
-method. The disconnect is that the errors at a given time point may not dissipate.
-What also needs to be checked is the asymtopic behavior of a disturbance. To
-see this, one can utilize the linear test problem:
-
-$$u' = \alpha u$$
-
-and ask the question, does the discrete dynamical system defined by the
-discretized ODE end up going to zero? You would hope that the discretized
-dynamical system and the continuous dynamical system have the same properties
-in this simple case, and this is known as linear stability analysis of the
-method.
-
-As an example, take a look at the Euler method. Recall that the Euler method
-was given by:
-
-$$u_{n+1} = u_n + \Delta t f(u_n,p,t)$$
-
-When we plug in the linear test equation, we get that
-
-$$u_{n+1} = u_n + \Delta t \alpha u_n$$
-
-If we let $z = \Delta t \alpha$, then we get the following:
-
-$$u_{n+1} = u_n + z u_n = (1+z)u_n$$
-
-which is stable when $z$ is in the shifted unit circle. This means that, as a
-necessary condition, the step size $\Delta t$ needs to be small enough that
-$z$ satisfies this condition, placing a stepsize limit on the method.
-
-### Interpretation of the Linear Stability Condition
-
-To interpret the linear stability condition, recall that the linearization of
-a system interprets the dynamics as locally being due to the Jacobian of the
-system. Thus
-
-$$u' = f(u,p,t)$$
-
-is locally equivalent to:
-
-$$u' = \frac{df}{du}u$$
-
-You can understand the local behavior through diagonalizing this matrix. Therefore,
-the scalar for the linear stability analysis is performing an analysis on the
-eigenvalues of the Jacobian. The method will be stable if the largest eigenvalues
-of df/du are all within the stability limit. This means that stability effects
-different
-
-### Implicit Methods
-
-If instead of the Euler method we defined $f$ to be evaluated at the future
-point, we would receive a method like:
-
-$$u_{n+1} = u_n + \Delta t f(u_{n+1},p,t+\Delta t)$$
-
-in which case, for the stability calculation we would have that
-
-$$u_{n+1} = u_n + \Delta t \alpha u_n$$
-
-or
-
-$$(1-z) u_{n+1} = u_n$$
-
-which means that
-
-$$u_{n+1} = \frac{1}{1-z} u_n$$
-
-which is stable for all $Re(z) < 0$ a property which is known as A-stability.
-It is also stable as $z \rightarrow \infty$, a property known as L-stability.
-This means that for equations with very ill-conditioned Jacobians, this method
-is still able to be use reasonably large stepsizes and can thus be efficient.
-
-### Stiffness and Timescale Separation
-
-From this we see that there is a maximal stepsize whenever the eigenvalues
-of the Jacobian are sufficiently large. It turns out that's not an issue if
-the phonomena we fast to see is fast, since then the total integration time
-tends to be small. However, is we have some equations with both fast modes
-and slow modes, like the Robertson equation, then it is very difficult because
-in order to resolve the slow dynamics over a long timespan, one needs to ensure
-that the fast dynamics do not diverge. This is a property known as stiffness.
-Stiffness can thus be approximated in some sense by the condition number of
-the Jacobian. The condition number of a matrix is its maximal eigenvalue divided
-by its minimal eigenvalue and gives an rough measure of the local timescale
-separations. If this value is large and one wants to resolve the slow dynamics,
-then explict integrators, like the explicit Runge-Kutta methods described before,
-have issues with stability. In this case implicit integrators (or other forms
-of stabilized stepping) are required in order to efficiently reach the end
-time step.
+This gave us a whopping 70x additional speedup! In the next lecture we will
+look mathematicallly why this phonomena shows up.
