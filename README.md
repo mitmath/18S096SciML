@@ -173,7 +173,7 @@ Today is mostly to introduce the motivation behind learning these methodologies.
 
 ##### Lecture Notes
 
-- [Introduction to Julia for Scientific Machine Learning](https://mitmath.github.io/18337/lecture2/ml)
+- [Introduction to Julia for Scientific Machine Learning](https://mitmath.github.io/18S096SciML/lecture2/ml)
 
 ##### Optional pre-reading materials
 
@@ -201,7 +201,7 @@ fitting parameters in a differential equation.
 
 ##### Lecture Notes
 
-- [Mixing Differential Equations and Machine Learning](https://mitmath.github.io/18337/lecture3/diffeq_ml)
+- [Mixing Differential Equations and Machine Learning](https://mitmath.github.io/18S096SciML/lecture3/diffeq_ml)
 
 ##### Optional pre-reading materials
 
@@ -223,7 +223,7 @@ as a way to interpret trained equations.
 
 ##### Lecture Notes
 
-- [Numerically Solving Partial Differential Equations](https://mitmath.github.io/18337/lecture4/pde_stiff)
+- [Numerically Solving Partial Differential Equations](https://mitmath.github.io/18S096SciML/lecture4/pde_stiff)
 
 ##### Optional pre-reading materials
 
