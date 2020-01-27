@@ -240,3 +240,43 @@ In these lectures we show how to discretize PDEs to turn them into ODEs, and the
 write code that gives optimized fast PDE solves. We end by noticing that the
 ODE solver choice can have a large effect on PDE performance, something that we
 will investigate in the following lecture.
+
+## Lecture 5: Stiffness, Stability, and Automatic Differentiation
+
+#### Lecture Notes
+
+- [Stiffness, Stability, and Automatic Differentiation](https://mitmath.github.io/18S096SciML/lecture5/stiffness)
+
+#### Summary
+
+Here we take a deep dive into the phenomena of stiffness. In the previous lecture
+we saw that changing our numerical solver gave a 20x performance increase, and
+stiffness explains why. We dig into the eigenvalue decomposition of the Jacobian
+and see how the condition number effects some numerical methods more than others,
+leading to a change in what methods will be good depending on this mysterious
+property. We then start to look practically about what to do in the case of stiffness.
+The analysis says we should use implicit methods, but those methods require a
+costly Newton step. However, by using things like sparsity detection and matrix
+coloring we can dramatically decrease the computational cost of implicit methods
+and rein in even large PDE solves.
+
+## Lecture 6: Stochastic Differential Equations, Deep Learning, and High-Dimensional PDEs
+
+#### Lecture Notes
+
+- [Stochastic Differential Equations, Deep Learning, and High-Dimensional PDEs](https://mitmath.github.io/18S096SciML/lecture6/sdes)
+
+#### Summary
+
+Now we explore an interesting offshoot in scientific machine learning, stochastic
+differential equations and their utility in seemingly disconnected areas. The
+first thing to do is the neural stochastic differential equation, which is like
+the neural ordinary differential equation but allows for fitting random quanitites
+as well. While this is a clear win, a more subtle approach makes use of deep
+knowledge of partial differential equations. We explore the connection between
+(stochastic) optimal control and the Hamilton-Jacobi-Bellman equation and showcase
+that neural networks embedded within stochastic differential equations give a
+practical way of representing the forward-backward stochastic differential equation
+and solve the general control problem, which gives rise to a provably optimal
+neural network method for controlling drones, financial markets, etc. given some
+underlying model.

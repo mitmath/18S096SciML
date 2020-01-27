@@ -824,8 +824,8 @@ and see the speed difference:
 
 ```julia
 using BenchmarkTools
-@btime solve(prob_ode_brusselator_2d,Rodas5(),save_everystep=false) # 51.714 s (7317 allocations: 70.12 MiB)
-@btime solve(prob_ode_brusselator_2d_sparse,Rodas5(),save_everystep=false) # 36.374 s (367199 allocations: 896.99 MiB)
+@btime solve(prob_ode_brusselator_2d,Rodas5(),save_everystep=false)
+@btime solve(prob_ode_brusselator_2d_sparse,Rodas5(),save_everystep=false)
 ```
 
 This isn't all that much, but that's because we haven't specialized on the color

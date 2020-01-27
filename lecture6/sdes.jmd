@@ -157,7 +157,7 @@ with diagonal noise (i.e., it's a system of equations, but each equation has
 its own noise term).
 
 ```julia
-using Flux, DiffEqFlux, StochasticDiffEq, Plots, DiffEqBase.EnsembleAnalysis
+using Flux, DiffEqFlux, StochasticDiffEq, Plots, DiffEqBase.EnsembleAnalysis, Statistics
 
 u0 = Float32[2.; 0.]
 datasize = 30
@@ -266,6 +266,20 @@ iter = 0 # reset the counter
 Flux.train!(loss_n_sde, ps, Iterators.repeated((), 100), opt, cb = cb)
 ```
 
+Now let's plot some trajectories out of the trained neural SDE:
+
+```julia
+ensemble_nprob = EnsembleProblem(nprob)
+ensemble_nsol = solve(ensemble_nprob,SOSRI(),trajectories = 100, saveat =t )
+ensemble_nsum = EnsembleSummary(ensemble_nsol)
+
+p2 = scatter(t,sde_data')
+plot!(p2,ensemble_nsum, title = "Neural SDE: After Training", xlabel="Time")
+scatter!(p2,t,sde_data',lw=3)
+
+plot(p1,p2,layout=(2,1))
+```
+
 And there we go: a neural dynamical system that fits both the mean and variance
 of the timeseries data. Of course, there are a million other loss functions to
 explore, with millions of different properties. And universal stochastic
@@ -314,7 +328,6 @@ $$\mathbb{E}\left[\frac{\partial\psi}{\partial x}f(x)\right]=\int_{-\infty}^{\in
 We rearrange terms doing integration by parts. Let $u=\rho f$ and
 $dv=\frac{\partial\psi}{\partial x}$. Thus $du=\frac{\partial(\rho f)}{\partial x}$
 and $v=\psi$. Therefore we get that:
-
 
 $$\mathbb{E}\left[\frac{\partial\psi}{\partial x}f(x)\right]=\left[\rho f\psi\right]_{-\infty}^{\infty}-\int_{-\infty}^{\infty}\frac{\partial(\rho f)}{\partial x}\psi(x)dx.$$
 
@@ -409,7 +422,7 @@ it would take $(64 \times 100)^100$ bits, or
 
 https://www.wolframalpha.com/input/?i=%2864*100%29%5E100+bits+as+terabytes
 
-$5 \times 10^367$ terabytes of memory! However, just a system of 100 SDEs can
+$5 \times 10^{367}$ terabytes of memory! However, just a system of 100 SDEs can
 be solved very easily. Exploiting this direction is known as the Feynman-Kac
 Theroem and it's commonly used in physical applications.
 
