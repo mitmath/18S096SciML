@@ -257,18 +257,20 @@ Notice that we setup our loss function to take in $n$ trajectories to run. We wi
 setup our training such that we first fit the mean well, then relax the variance
 terms:
 
-```julia
+```julia;eval=false
 Flux.train!(()->loss_n_sde(n=10), ps, Iterators.repeated((), 100), opt, cb = cb)
 ```
 
-```julia
+```julia;eval=false
 iter = 0 # reset the counter
 Flux.train!(loss_n_sde, ps, Iterators.repeated((), 100), opt, cb = cb)
 ```
 
+(note: training is disabled in the notes since this takes awhile!)
+
 Now let's plot some trajectories out of the trained neural SDE:
 
-```julia
+```julia;eval=false
 ensemble_nprob = EnsembleProblem(nprob)
 ensemble_nsol = solve(ensemble_nprob,SOSRI(),trajectories = 100, saveat =t )
 ensemble_nsum = EnsembleSummary(ensemble_nsol)
@@ -279,6 +281,8 @@ scatter!(p2,t,sde_data',lw=3)
 
 plot(p1,p2,layout=(2,1))
 ```
+
+![](https://user-images.githubusercontent.com/1814174/72701137-43bffc80-3b1c-11ea-9858-414ecbdd15e7.png)
 
 And there we go: a neural dynamical system that fits both the mean and variance
 of the timeseries data. Of course, there are a million other loss functions to
