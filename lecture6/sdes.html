@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<HTML lang = "en">
+<HEAD>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Stochastic Differential Equations, Deep Learning, and High-Dimensional PDEs</title>
+  
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: { equationNumbers: { autoNumber: "AMS" } }
+    });
+  </script>
+
+  <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+
+  
+<style>
+pre.hljl {
+    border: 1px solid #ccc;
+    margin: 5px;
+    padding: 5px;
+    overflow-x: auto;
+    color: rgb(68,68,68); background-color: rgb(251,251,251); }
+pre.hljl > span.hljl-t { }
+pre.hljl > span.hljl-w { }
+pre.hljl > span.hljl-e { }
+pre.hljl > span.hljl-eB { }
+pre.hljl > span.hljl-o { }
+pre.hljl > span.hljl-k { color: rgb(148,91,176); font-weight: bold; }
+pre.hljl > span.hljl-kc { color: rgb(59,151,46); font-style: italic; }
+pre.hljl > span.hljl-kd { color: rgb(214,102,97); font-style: italic; }
+pre.hljl > span.hljl-kn { color: rgb(148,91,176); font-weight: bold; }
+pre.hljl > span.hljl-kp { color: rgb(148,91,176); font-weight: bold; }
+pre.hljl > span.hljl-kr { color: rgb(148,91,176); font-weight: bold; }
+pre.hljl > span.hljl-kt { color: rgb(148,91,176); font-weight: bold; }
+pre.hljl > span.hljl-n { }
+pre.hljl > span.hljl-na { }
+pre.hljl > span.hljl-nb { }
+pre.hljl > span.hljl-nbp { }
+pre.hljl > span.hljl-nc { }
+pre.hljl > span.hljl-ncB { }
+pre.hljl > span.hljl-nd { color: rgb(214,102,97); }
+pre.hljl > span.hljl-ne { }
+pre.hljl > span.hljl-neB { }
+pre.hljl > span.hljl-nf { color: rgb(66,102,213); }
+pre.hljl > span.hljl-nfm { color: rgb(66,102,213); }
+pre.hljl > span.hljl-np { }
+pre.hljl > span.hljl-nl { }
+pre.hljl > span.hljl-nn { }
+pre.hljl > span.hljl-no { }
+pre.hljl > span.hljl-nt { }
+pre.hljl > span.hljl-nv { }
+pre.hljl > span.hljl-nvc { }
+pre.hljl > span.hljl-nvg { }
+pre.hljl > span.hljl-nvi { }
+pre.hljl > span.hljl-nvm { }
+pre.hljl > span.hljl-l { }
+pre.hljl > span.hljl-ld { color: rgb(148,91,176); font-style: italic; }
+pre.hljl > span.hljl-s { color: rgb(201,61,57); }
+pre.hljl > span.hljl-sa { color: rgb(201,61,57); }
+pre.hljl > span.hljl-sb { color: rgb(201,61,57); }
+pre.hljl > span.hljl-sc { color: rgb(201,61,57); }
+pre.hljl > span.hljl-sd { color: rgb(201,61,57); }
+pre.hljl > span.hljl-sdB { color: rgb(201,61,57); }
+pre.hljl > span.hljl-sdC { color: rgb(201,61,57); }
+pre.hljl > span.hljl-se { color: rgb(59,151,46); }
+pre.hljl > span.hljl-sh { color: rgb(201,61,57); }
+pre.hljl > span.hljl-si { }
+pre.hljl > span.hljl-so { color: rgb(201,61,57); }
+pre.hljl > span.hljl-sr { color: rgb(201,61,57); }
+pre.hljl > span.hljl-ss { color: rgb(201,61,57); }
+pre.hljl > span.hljl-ssB { color: rgb(201,61,57); }
+pre.hljl > span.hljl-nB { color: rgb(59,151,46); }
+pre.hljl > span.hljl-nbB { color: rgb(59,151,46); }
+pre.hljl > span.hljl-nfB { color: rgb(59,151,46); }
+pre.hljl > span.hljl-nh { color: rgb(59,151,46); }
+pre.hljl > span.hljl-ni { color: rgb(59,151,46); }
+pre.hljl > span.hljl-nil { color: rgb(59,151,46); }
+pre.hljl > span.hljl-noB { color: rgb(59,151,46); }
+pre.hljl > span.hljl-oB { color: rgb(102,102,102); font-weight: bold; }
+pre.hljl > span.hljl-ow { color: rgb(102,102,102); font-weight: bold; }
+pre.hljl > span.hljl-p { }
+pre.hljl > span.hljl-c { color: rgb(153,153,119); font-style: italic; }
+pre.hljl > span.hljl-ch { color: rgb(153,153,119); font-style: italic; }
+pre.hljl > span.hljl-cm { color: rgb(153,153,119); font-style: italic; }
+pre.hljl > span.hljl-cp { color: rgb(153,153,119); font-style: italic; }
+pre.hljl > span.hljl-cpB { color: rgb(153,153,119); font-style: italic; }
+pre.hljl > span.hljl-cs { color: rgb(153,153,119); font-style: italic; }
+pre.hljl > span.hljl-csB { color: rgb(153,153,119); font-style: italic; }
+pre.hljl > span.hljl-g { }
+pre.hljl > span.hljl-gd { }
+pre.hljl > span.hljl-ge { }
+pre.hljl > span.hljl-geB { }
+pre.hljl > span.hljl-gh { }
+pre.hljl > span.hljl-gi { }
+pre.hljl > span.hljl-go { }
+pre.hljl > span.hljl-gp { }
+pre.hljl > span.hljl-gs { }
+pre.hljl > span.hljl-gsB { }
+pre.hljl > span.hljl-gt { }
+</style>
+
+
+
+  <style type="text/css">
+  @font-face {
+  font-style: normal;
+  font-weight: 300;
+}
+@font-face {
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-style: normal;
+  font-weight: 600;
+}
+html {
+  font-family: sans-serif; /* 1 */
+  -ms-text-size-adjust: 100%; /* 2 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+}
+body {
+  margin: 0;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+audio,
+canvas,
+progress,
+video {
+  display: inline-block; /* 1 */
+  vertical-align: baseline; /* 2 */
+}
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+[hidden],
+template {
+  display: none;
+}
+a:active,
+a:hover {
+  outline: 0;
+}
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+b,
+strong {
+  font-weight: bold;
+}
+dfn {
+  font-style: italic;
+}
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+mark {
+  background: #ff0;
+  color: #000;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+img {
+  border: 0;
+}
+svg:not(:root) {
+  overflow: hidden;
+}
+figure {
+  margin: 1em 40px;
+}
+hr {
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  height: 0;
+}
+pre {
+  overflow: auto;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit; /* 1 */
+  font: inherit; /* 2 */
+  margin: 0; /* 3 */
+}
+button {
+  overflow: visible;
+}
+button,
+select {
+  text-transform: none;
+}
+button,
+html input[type="button"], /* 1 */
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button; /* 2 */
+  cursor: pointer; /* 3 */
+}
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+input {
+  line-height: normal;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box; /* 1 */
+  padding: 0; /* 2 */
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+input[type="search"] {
+  -webkit-appearance: textfield; /* 1 */
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box; /* 2 */
+  box-sizing: content-box;
+}
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em;
+}
+legend {
+  border: 0; /* 1 */
+  padding: 0; /* 2 */
+}
+textarea {
+  overflow: auto;
+}
+optgroup {
+  font-weight: bold;
+}
+table {
+  font-family: monospace, monospace;
+  font-size : 0.8em;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+td,
+th {
+  padding: 0;
+}
+thead th {
+    border-bottom: 1px solid black;
+    background-color: white;
+}
+tr:nth-child(odd){
+  background-color: rgb(248,248,248);
+}
+
+
+/*
+* Skeleton V2.0.4
+* Copyright 2014, Dave Gamache
+* www.getskeleton.com
+* Free to use under the MIT license.
+* http://www.opensource.org/licenses/mit-license.php
+* 12/29/2014
+*/
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box; }
+.column,
+.columns {
+  width: 100%;
+  float: left;
+  box-sizing: border-box; }
+@media (min-width: 400px) {
+  .container {
+    width: 85%;
+    padding: 0; }
+}
+@media (min-width: 550px) {
+  .container {
+    width: 80%; }
+  .column,
+  .columns {
+    margin-left: 4%; }
+  .column:first-child,
+  .columns:first-child {
+    margin-left: 0; }
+
+  .one.column,
+  .one.columns                    { width: 4.66666666667%; }
+  .two.columns                    { width: 13.3333333333%; }
+  .three.columns                  { width: 22%;            }
+  .four.columns                   { width: 30.6666666667%; }
+  .five.columns                   { width: 39.3333333333%; }
+  .six.columns                    { width: 48%;            }
+  .seven.columns                  { width: 56.6666666667%; }
+  .eight.columns                  { width: 65.3333333333%; }
+  .nine.columns                   { width: 74.0%;          }
+  .ten.columns                    { width: 82.6666666667%; }
+  .eleven.columns                 { width: 91.3333333333%; }
+  .twelve.columns                 { width: 100%; margin-left: 0; }
+
+  .one-third.column               { width: 30.6666666667%; }
+  .two-thirds.column              { width: 65.3333333333%; }
+
+  .one-half.column                { width: 48%; }
+
+  /* Offsets */
+  .offset-by-one.column,
+  .offset-by-one.columns          { margin-left: 8.66666666667%; }
+  .offset-by-two.column,
+  .offset-by-two.columns          { margin-left: 17.3333333333%; }
+  .offset-by-three.column,
+  .offset-by-three.columns        { margin-left: 26%;            }
+  .offset-by-four.column,
+  .offset-by-four.columns         { margin-left: 34.6666666667%; }
+  .offset-by-five.column,
+  .offset-by-five.columns         { margin-left: 43.3333333333%; }
+  .offset-by-six.column,
+  .offset-by-six.columns          { margin-left: 52%;            }
+  .offset-by-seven.column,
+  .offset-by-seven.columns        { margin-left: 60.6666666667%; }
+  .offset-by-eight.column,
+  .offset-by-eight.columns        { margin-left: 69.3333333333%; }
+  .offset-by-nine.column,
+  .offset-by-nine.columns         { margin-left: 78.0%;          }
+  .offset-by-ten.column,
+  .offset-by-ten.columns          { margin-left: 86.6666666667%; }
+  .offset-by-eleven.column,
+  .offset-by-eleven.columns       { margin-left: 95.3333333333%; }
+
+  .offset-by-one-third.column,
+  .offset-by-one-third.columns    { margin-left: 34.6666666667%; }
+  .offset-by-two-thirds.column,
+  .offset-by-two-thirds.columns   { margin-left: 69.3333333333%; }
+
+  .offset-by-one-half.column,
+  .offset-by-one-half.columns     { margin-left: 52%; }
+
+}
+html {
+  font-size: 62.5%; }
+body {
+  font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #222; }
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  font-weight: 300; }
+h1 { font-size: 3.6rem; line-height: 1.2;  letter-spacing: -.1rem;}
+h2 { font-size: 3.4rem; line-height: 1.25; letter-spacing: -.1rem; }
+h3 { font-size: 3.2rem; line-height: 1.3;  letter-spacing: -.1rem; }
+h4 { font-size: 2.8rem; line-height: 1.35; letter-spacing: -.08rem; }
+h5 { font-size: 2.4rem; line-height: 1.5;  letter-spacing: -.05rem; }
+h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+
+p {
+  margin-top: 0; }
+a {
+  color: #1EAEDB; }
+a:hover {
+  color: #0FA0CE; }
+.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+  display: inline-block;
+  height: 38px;
+  padding: 0 30px;
+  color: #555;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 38px;
+  letter-spacing: .1rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  cursor: pointer;
+  box-sizing: border-box; }
+.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+.button:focus,
+button:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+input[type="button"]:focus {
+  color: #333;
+  border-color: #888;
+  outline: 0; }
+.button.button-primary,
+button.button-primary,
+input[type="submit"].button-primary,
+input[type="reset"].button-primary,
+input[type="button"].button-primary {
+  color: #FFF;
+  background-color: #33C3F0;
+  border-color: #33C3F0; }
+.button.button-primary:hover,
+button.button-primary:hover,
+input[type="submit"].button-primary:hover,
+input[type="reset"].button-primary:hover,
+input[type="button"].button-primary:hover,
+.button.button-primary:focus,
+button.button-primary:focus,
+input[type="submit"].button-primary:focus,
+input[type="reset"].button-primary:focus,
+input[type="button"].button-primary:focus {
+  color: #FFF;
+  background-color: #1EAEDB;
+  border-color: #1EAEDB; }
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea,
+select {
+  height: 38px;
+  padding: 6px 10px; /* The 6px vertically centers text on FF, ignored by Webkit */
+  background-color: #fff;
+  border: 1px solid #D1D1D1;
+  border-radius: 4px;
+  box-shadow: none;
+  box-sizing: border-box; }
+/* Removes awkward default styles on some inputs for iOS */
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+textarea {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none; }
+textarea {
+  min-height: 65px;
+  padding-top: 6px;
+  padding-bottom: 6px; }
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border: 1px solid #33C3F0;
+  outline: 0; }
+label,
+legend {
+  display: block;
+  margin-bottom: .5rem;
+  font-weight: 600; }
+fieldset {
+  padding: 0;
+  border-width: 0; }
+input[type="checkbox"],
+input[type="radio"] {
+  display: inline; }
+label > .label-body {
+  display: inline-block;
+  margin-left: .5rem;
+  font-weight: normal; }
+ul {
+  list-style: circle; }
+ol {
+  list-style: decimal; }
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+  margin: 1.5rem 0 1.5rem 3rem;
+  font-size: 90%; }
+li > p {margin : 0;}
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #E1E1E1; }
+th:first-child,
+td:first-child {
+  padding-left: 0; }
+th:last-child,
+td:last-child {
+  padding-right: 0; }
+button,
+.button {
+  margin-bottom: 1rem; }
+input,
+textarea,
+select,
+fieldset {
+  margin-bottom: 1.5rem; }
+pre,
+blockquote,
+dl,
+figure,
+table,
+p,
+ul,
+ol,
+form {
+  margin-bottom: 1.0rem; }
+.u-full-width {
+  width: 100%;
+  box-sizing: border-box; }
+.u-max-full-width {
+  max-width: 100%;
+  box-sizing: border-box; }
+.u-pull-right {
+  float: right; }
+.u-pull-left {
+  float: left; }
+hr {
+  margin-top: 3rem;
+  margin-bottom: 3.5rem;
+  border-width: 0;
+  border-top: 1px solid #E1E1E1; }
+.container:after,
+.row:after,
+.u-cf {
+  content: "";
+  display: table;
+  clear: both; }
+
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.42857143;
+  word-break: break-all;
+  word-wrap: break-word;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+pre.hljl {
+  margin: 0 0 10px;
+  display: block;
+  background: #f5f5f5;
+  border-radius: 4px;
+  padding : 5px;
+}
+
+pre.output {
+  background: #ffffff;
+}
+
+pre.code {
+  background: #ffffff;
+}
+
+pre.julia-error {
+  color : red
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px;
+}
+
+
+@media (min-width: 400px) {}
+@media (min-width: 550px) {}
+@media (min-width: 750px) {}
+@media (min-width: 1000px) {}
+@media (min-width: 1200px) {}
+
+h1.title {margin-top : 20px}
+img {max-width : 100%}
+div.title {text-align: center;}
+
+  </style>
+
+
+
+</HEAD>
+  <BODY>
+    <div class ="container">
+      <div class = "row">
+        <div class = "col-md-12 twelve columns">
+
+          <div class="title">
+            <h1 class="title">Stochastic Differential Equations, Deep Learning, and High-Dimensional PDEs</h1>
+            <h5>Chris Rackauckas</h5>
+            <h5>January 18th, 2020</h5>
+          </div>
+
+          <p>Now we will suss out the relationship between SDEs and PDEs and how this is used in scientific machine learning to solve previously unsolvable problems with a neural network as the intermediate.</p>
+<h2>What is an SDE?</h2>
+<p>The easiest way to understand an SDE is by looking at it computationally. For the SDE defined as:</p>
+<p class="math">\[
+dX_t = f(X_t,t)dt + g(X_t,t)dW_t
+\]</p>
+<p>the &quot;Euler method for SDEs&quot;, also known as Euler-Maruyama, is given by:</p>
+<p class="math">\[
+X_{n+1} = X_n + f(X_n,t_n)h + sqrt(h)g(X_n,t_n)\zeta
+\]</p>
+<p>where <span class="math">$\zeta ~ N(0,1)$</span> is a standard normal random variable &#40;<code>randn&#40;&#41;</code>&#41;. Thus a stochastic differential equation is an ordinary differential equation with a small stochastic perturbation at every point in time &#40;continuously&#33;&#41;.</p>
+<p>There are many definitions of Brownian motion. One of the easiest to picture is that it&#39;s the random walk where at every infinitesimal <span class="math">$dt$</span> you move by <span class="math">$N(0,dt)$</span> &#40;this is formally true in non-standard analysis, see Radically Elementary Probability Theory for details&#41;. Another way to think of it is as a limit of standard random walks. Let&#39;s say you have a random walk were every time step of <span class="math">$h$</span> you move <span class="math">$\Delta x$</span> to the right or left. If you let <span class="math">$h/\Delta x = 1$</span> and send <span class="math">$h \rightarrow 0$</span>, then the limiting process is a Brownian motion. All of the stuff about normal distributions just comes from the central limit theorem and the fact that you&#39;re doing infinitely many movements per second&#33;</p>
+<h2>Wiener Process Calculus Summarized</h2>
+<p>Brownian motion is non-differentiable, and this is fairly straightforward to prove. Take any finite <span class="math">$h>0$</span>. In that interval, the probability that the Brownian motion has a given value is <span class="math">$N(0,h)$</span>. Thus it has a positive probability of being positive and a positive probability of being negative. Thus take the sequence <span class="math">$h/2$</span>, <span class="math">$h/4$</span>, etc. to have infinitely many subintervals. With probability 1 at least one of those values will be positive and at least one will be negative, and so for every <span class="math">$h$</span> there is a positive or negative value, which means Brownian motion is always neither increasing or decreasing. This means that, if the classical derivative existed, it must be zero, which means it&#39;s a constant function, but it&#39;s not, so by contradiction Brownian motion cannot have a classical derivative&#33;</p>
+<p>However, with a bunch of analysis one can derive an appropriate calculus on SDEs. Take the SDE</p>
+<p class="math">\[
+dx=f(x,t)dt+\sum_{i=1}^{n}g_{i}(x,t)dW_{i}
+\]</p>
+<p>where <span class="math">$W_{i}(t)$</span> is a standard Brownian motion. Ito&#39;s Rules &#40;the stochastic chain rule&#41; could be interpreted as:</p>
+<p class="math">\[
+dt\times dt=0
+\]</p>
+<p class="math">\[
+dW_{i}\times dt=0
+\]</p>
+<p class="math">\[
+dW_{i}\times dW_{i} = dt
+\]</p>
+<p class="math">\[
+dW_{i}\times dW_{j} = 0\,\,\,\,j\neq i
+\]</p>
+<p>and thus if <span class="math">$y=\psi(x,t)$</span>, Ito&#39;s rules can be written as:</p>
+<p class="math">\[
+dy=\frac{\partial\psi}{\partial t}dt+\frac{\partial\psi}{\partial x}dx+\frac{1}{2}\frac{\partial^{2}\psi}{\partial x^{2}}\left(dx\right)^{2}
+\]</p>
+<p>where, if we plug in <span class="math">$dx,$</span> we get</p>
+<p class="math">\[
+dy=d\psi(x,t)=\left(\frac{\partial\psi}{\partial t}+f(x,t)\frac{\partial\psi}{\partial x}+\frac{1}{2}\sum_{i=1}^{n}g_{i}^{2}(x,t)\frac{\partial^{2}\psi}{\partial x^{2}}\right)dt+\frac{\partial\psi}{\partial x}\sum_{i=1}^{n}g_{i}(x,t)dW_{i}
+\]</p>
+<p>Notice that this is the same as the normal chain rule formula, but now there is a second order correction to the main variable. The solution is given by the integral form:</p>
+<p class="math">\[
+x(t)=x(0)+\int_{0}^{t}f(x(s))ds+\int_{0}^{t}\sum_{i=1}^{m}g_{i}(x(s))dW_{i}.
+\]</p>
+<p>Note that we can also generalize Ito&#39;s lemma to the multidimensional</p>
+<p class="math">\[
+\mathbf{X}\in\mathbb{R}^{n}
+\]</p>
+<p>case:</p>
+<p class="math">\[
+d\psi(\mathbf{X})=\left<\frac{\partial\psi}{\partial\mathbf{X}},f(\mathbf{X})\right>dt+\sum_{i=1}^{m}\left<\frac{\partial\psi}{\partial\mathbf{X}},g_{i}(\mathbf{X})\right>dW_{i}+\frac{1}{2}\sum_{i=1}^{m}g_{i}(\mathbf{X})^{T}\nabla^{2}\psi(\mathbf{X})g_{i}(\mathbf{X})dt
+\]</p>
+<p>There are many other rules as well:</p>
+<ul>
+<li><p>Product Rule: <span class="math">$d(X_{t}Y_{t})=X_{t}dY+Y_{t}dX+dXdY$</span>.</p>
+</li>
+<li><p>Integration By Parts: <span class="math">$\int_{0}^{t}X_{t}dY_{t}=X_{t}Y_{t}-X_{0}Y_{0}-\int_{0}^{t}Y_{t}dX_{t}-\int_{0}^{t}dX_{t}dY_{t}$</span>.</p>
+</li>
+<li><p>Invariance: <span class="math">$\mathbb{E}\left[\left(W(t)-W(s)\right)^{2}\right]=t-s$</span> for <span class="math">$t>s$</span>.</p>
+</li>
+<li><p>Expectation: <span class="math">$\mathbb{E}[W(t_{1})W(t_{2})]=\min(t_{1},t_{2})$</span>.</p>
+</li>
+<li><p>Independent Increments: <span class="math">$\mathbb{E}\left[\left(W_{t_{i}}-W_{s_{1}}\right)\left(W_{t_{2}}-W_{s_{2}}\right)\right]=0$</span> if <span class="math">$\left[t_{1},s_{1}\right]$</span> does not overlap <span class="math">$\left[t_{2},s_{2}\right]$</span>.</p>
+</li>
+<li><p>Expectation of the Integral: <span class="math">$\mathbb{E}\left[\int_{0}^{t}h(t)dW_{t}\right]=\mathbb{E}\left[h(t)dW_{t}\right]=0$</span>.</p>
+</li>
+<li><p>Ito Isometry: <span class="math">$\mathbb{E}\left[\left(\int_{0}^{T}X_{t}dW_{t}\right)\right]=\mathbb{E}\left[\int_{0}^{T}X_{t}^{2}dt\right]$</span></p>
+</li>
+</ul>
+<h3>Example Problem: Geometric Brownian Motion</h3>
+<p>Look at the example stochastic process:</p>
+<p class="math">\[
+dx=\alpha xdt+\sigma xdW.
+\]</p>
+<p>To solve this, we start with our intuition from Newton&#39;s Calculus that this may be an exponential growth process. Thus we check Ito&#39;s equation on the logarithm <span class="math">$\psi(x,t)=\ln(x)$</span> for this process is,</p>
+<p class="math">\[
+\begin{eqnarray*}
+d\left(\ln x\right) & = & \left(0+\left(\alpha x\right)\left(\frac{1}{x}\right)-\frac{1}{2}\left(\sigma^{2}x^{2}\right)\left(\frac{1}{x^{2}}\right)\right)dt+\left(\frac{1}{x}\right)\left(\sigma x\right)dW\\
+d\left(\ln x\right) & = & \left(\alpha-\frac{1}{2}\sigma^{2}\right)dt+\sigma dW.
+\end{eqnarray*}
+\]</p>
+<p>Thus by taking the integral of both sides we get</p>
+<p class="math">\[
+\ln(x)=\left(\alpha-\frac{1}{2}\sigma^{2}\right)t+\sigma W(t)
+\]</p>
+<p>and then exponentiating both sides:</p>
+<p class="math">\[
+x(t)=e^{\left(\alpha-\frac{1}{2}\sigma^{2}\right)t+\sigma W(t)}.
+\]</p>
+<p>Notice that since the Wiener process <span class="math">$W(t)\sim N(0,t)$</span>, the log of <span class="math">$x$</span> is distributed normally as <span class="math">$N(\left(\alpha-\frac{1}{2}\sigma^{2}\right)t,\sigma^{2}t)$</span>. Thus <span class="math">$x(t)$</span> is distributed as what is known as the log-normal distribution.</p>
+<h3>Example Numerical Solution of Geometric Brownian Motion</h3>
+
+
+
+<pre class='hljl'>
+<span class='hljl-k'>using</span><span class='hljl-t'> </span><span class='hljl-n'>StochasticDiffEq</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>Plots</span><span class='hljl-t'>
+</span><span class='hljl-n'>p</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-p'>(</span><span class='hljl-n'>μ</span><span class='hljl-oB'>=</span><span class='hljl-nfB'>1.0</span><span class='hljl-p'>,</span><span class='hljl-n'>σ</span><span class='hljl-oB'>=</span><span class='hljl-nfB'>1.0</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-nf'>f</span><span class='hljl-p'>(</span><span class='hljl-n'>u</span><span class='hljl-p'>,</span><span class='hljl-n'>p</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>)</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>p</span><span class='hljl-oB'>.</span><span class='hljl-n'>μ</span><span class='hljl-oB'>*</span><span class='hljl-n'>u</span><span class='hljl-t'>
+</span><span class='hljl-nf'>g</span><span class='hljl-p'>(</span><span class='hljl-n'>u</span><span class='hljl-p'>,</span><span class='hljl-n'>p</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>)</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>p</span><span class='hljl-oB'>.</span><span class='hljl-n'>σ</span><span class='hljl-oB'>*</span><span class='hljl-n'>u</span><span class='hljl-t'>
+</span><span class='hljl-n'>prob</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>SDEProblem</span><span class='hljl-p'>(</span><span class='hljl-n'>f</span><span class='hljl-p'>,</span><span class='hljl-n'>g</span><span class='hljl-p'>,</span><span class='hljl-nfB'>1.0</span><span class='hljl-p'>,(</span><span class='hljl-nfB'>0.0</span><span class='hljl-p'>,</span><span class='hljl-nfB'>1.0</span><span class='hljl-p'>),</span><span class='hljl-n'>p</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>sol</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>solve</span><span class='hljl-p'>(</span><span class='hljl-n'>prob</span><span class='hljl-p'>,</span><span class='hljl-nf'>SRIW1</span><span class='hljl-p'>())</span><span class='hljl-t'>
+</span><span class='hljl-nf'>plot</span><span class='hljl-p'>(</span><span class='hljl-n'>sol</span><span class='hljl-p'>)</span>
+</pre>
+
+
+<p>and automatic parallelism of the solution:</p>
+
+
+
+<pre class='hljl'>
+<span class='hljl-k'>using</span><span class='hljl-t'> </span><span class='hljl-n'>DiffEqBase</span><span class='hljl-oB'>.</span><span class='hljl-n'>EnsembleAnalysis</span><span class='hljl-t'>
+</span><span class='hljl-n'>enprob</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>EnsembleProblem</span><span class='hljl-p'>(</span><span class='hljl-n'>prob</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-cs'># Note: Automatically parallel! Try on the GPU with EnsembleGPUArray() from DiffEqGPU.jl!</span><span class='hljl-t'>
+</span><span class='hljl-n'>ensol</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>solve</span><span class='hljl-p'>(</span><span class='hljl-n'>enprob</span><span class='hljl-p'>,</span><span class='hljl-nf'>SRIW1</span><span class='hljl-p'>(),</span><span class='hljl-n'>trajectories</span><span class='hljl-oB'>=</span><span class='hljl-ni'>10000</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>summ</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>EnsembleSummary</span><span class='hljl-p'>(</span><span class='hljl-n'>ensol</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-nf'>plot</span><span class='hljl-p'>(</span><span class='hljl-n'>summ</span><span class='hljl-p'>)</span>
+</pre>
+
+
+<h2>SDEs as Regularized ODEs and Neural Stochastic Differential Equations</h2>
+<p>Since SDEs have inherent randomness to them, trivially it follows that they tend to not overfit data since, if they try to fit weird aspects of the data too closely, the randomness will wash out any attempt. <a href="https://www.sciencedirect.com/science/article/pii/S0025556414000510">This was noticed awhile back</a> as a method for improving parameter estimation of determinsitic systems, and now is being revived as a tool for neural ODEs. The result is the neural SDE, which is a form of neural ODE where each trajectory is random.</p>
+<p>To start, let&#39;s first build a training dataset from some true SDE. Here let&#39;s use the SDE:</p>
+<p class="math">\[
+du_t = Au^3dt + 0.2dW_t
+\]</p>
+<p>with diagonal noise &#40;i.e., it&#39;s a system of equations, but each equation has its own noise term&#41;.</p>
+
+
+
+<pre class='hljl'>
+<span class='hljl-k'>using</span><span class='hljl-t'> </span><span class='hljl-n'>Flux</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>DiffEqFlux</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>StochasticDiffEq</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>Plots</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>DiffEqBase</span><span class='hljl-oB'>.</span><span class='hljl-n'>EnsembleAnalysis</span><span class='hljl-t'>
+
+</span><span class='hljl-n'>u0</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>Float32</span><span class='hljl-p'>[</span><span class='hljl-nfB'>2.</span><span class='hljl-p'>;</span><span class='hljl-t'> </span><span class='hljl-nfB'>0.</span><span class='hljl-p'>]</span><span class='hljl-t'>
+</span><span class='hljl-n'>datasize</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-ni'>30</span><span class='hljl-t'>
+</span><span class='hljl-n'>tspan</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-p'>(</span><span class='hljl-nfB'>0.0f0</span><span class='hljl-p'>,</span><span class='hljl-nfB'>1.0f0</span><span class='hljl-p'>)</span><span class='hljl-t'>
+
+</span><span class='hljl-k'>function</span><span class='hljl-t'> </span><span class='hljl-nf'>trueSDEfunc</span><span class='hljl-p'>(</span><span class='hljl-n'>du</span><span class='hljl-p'>,</span><span class='hljl-n'>u</span><span class='hljl-p'>,</span><span class='hljl-n'>p</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>)</span><span class='hljl-t'>
+    </span><span class='hljl-n'>true_A</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-p'>[</span><span class='hljl-oB'>-</span><span class='hljl-nfB'>0.1</span><span class='hljl-t'> </span><span class='hljl-nfB'>2.0</span><span class='hljl-p'>;</span><span class='hljl-t'> </span><span class='hljl-oB'>-</span><span class='hljl-nfB'>2.0</span><span class='hljl-t'> </span><span class='hljl-oB'>-</span><span class='hljl-nfB'>0.1</span><span class='hljl-p'>]</span><span class='hljl-t'>
+    </span><span class='hljl-n'>du</span><span class='hljl-t'> </span><span class='hljl-oB'>.=</span><span class='hljl-t'> </span><span class='hljl-p'>((</span><span class='hljl-n'>u</span><span class='hljl-oB'>.^</span><span class='hljl-ni'>3</span><span class='hljl-p'>)</span><span class='hljl-oB'>&#39;</span><span class='hljl-n'>true_A</span><span class='hljl-p'>)</span><span class='hljl-oB'>&#39;</span><span class='hljl-t'>
+</span><span class='hljl-k'>end</span><span class='hljl-t'>
+</span><span class='hljl-n'>t</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>range</span><span class='hljl-p'>(</span><span class='hljl-n'>tspan</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>],</span><span class='hljl-n'>tspan</span><span class='hljl-p'>[</span><span class='hljl-ni'>2</span><span class='hljl-p'>],</span><span class='hljl-n'>length</span><span class='hljl-oB'>=</span><span class='hljl-n'>datasize</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>mp</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>Float32</span><span class='hljl-p'>[</span><span class='hljl-nfB'>0.2</span><span class='hljl-p'>,</span><span class='hljl-nfB'>0.2</span><span class='hljl-p'>]</span><span class='hljl-t'>
+</span><span class='hljl-k'>function</span><span class='hljl-t'> </span><span class='hljl-nf'>true_noise_func</span><span class='hljl-p'>(</span><span class='hljl-n'>du</span><span class='hljl-p'>,</span><span class='hljl-n'>u</span><span class='hljl-p'>,</span><span class='hljl-n'>p</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>)</span><span class='hljl-t'>
+    </span><span class='hljl-n'>du</span><span class='hljl-t'> </span><span class='hljl-oB'>.=</span><span class='hljl-t'> </span><span class='hljl-n'>mp</span><span class='hljl-oB'>.*</span><span class='hljl-n'>u</span><span class='hljl-t'>
+</span><span class='hljl-k'>end</span><span class='hljl-t'>
+</span><span class='hljl-n'>prob</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>SDEProblem</span><span class='hljl-p'>(</span><span class='hljl-n'>trueSDEfunc</span><span class='hljl-p'>,</span><span class='hljl-n'>true_noise_func</span><span class='hljl-p'>,</span><span class='hljl-n'>u0</span><span class='hljl-p'>,</span><span class='hljl-n'>tspan</span><span class='hljl-p'>)</span>
+</pre>
+
+
+<p>Our dataset will be the means and variances from 100,000 runs:</p>
+
+
+
+<pre class='hljl'>
+<span class='hljl-cs'># Take a typical sample from the mean</span><span class='hljl-t'>
+</span><span class='hljl-n'>ensemble_prob</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>EnsembleProblem</span><span class='hljl-p'>(</span><span class='hljl-n'>prob</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>ensemble_sol</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>solve</span><span class='hljl-p'>(</span><span class='hljl-n'>ensemble_prob</span><span class='hljl-p'>,</span><span class='hljl-nf'>SOSRI</span><span class='hljl-p'>(),</span><span class='hljl-n'>trajectories</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-ni'>10000</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>ensemble_sum</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>EnsembleSummary</span><span class='hljl-p'>(</span><span class='hljl-n'>ensemble_sol</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>sde_data</span><span class='hljl-p'>,</span><span class='hljl-n'>sde_data_vars</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>Array</span><span class='hljl-oB'>.</span><span class='hljl-p'>(</span><span class='hljl-nf'>timeseries_point_meanvar</span><span class='hljl-p'>(</span><span class='hljl-n'>ensemble_sol</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>))</span>
+</pre>
+
+
+<p>Now let&#39;s build the neural SDE. In its general form,</p>
+<p class="math">\[
+dX_t = f(X_t,t)dt + g(X_t,t)dW_t
+\]</p>
+<p>we will specify both <span class="math">$f$</span> and <span class="math">$g$</span> as neural networks, but define the noise term <span class="math">$g$</span> to be diagonal noise, matching the data generation process.</p>
+
+
+
+<pre class='hljl'>
+<span class='hljl-n'>drift_dudt</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>Chain</span><span class='hljl-p'>(</span><span class='hljl-n'>x</span><span class='hljl-t'> </span><span class='hljl-oB'>-&gt;</span><span class='hljl-t'> </span><span class='hljl-n'>x</span><span class='hljl-oB'>.^</span><span class='hljl-ni'>3</span><span class='hljl-p'>,</span><span class='hljl-t'>
+             </span><span class='hljl-nf'>Dense</span><span class='hljl-p'>(</span><span class='hljl-ni'>2</span><span class='hljl-p'>,</span><span class='hljl-ni'>50</span><span class='hljl-p'>,</span><span class='hljl-n'>tanh</span><span class='hljl-p'>),</span><span class='hljl-t'>
+             </span><span class='hljl-nf'>Dense</span><span class='hljl-p'>(</span><span class='hljl-ni'>50</span><span class='hljl-p'>,</span><span class='hljl-ni'>2</span><span class='hljl-p'>))</span><span class='hljl-t'>
+</span><span class='hljl-n'>diffusion_dudt</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>Chain</span><span class='hljl-p'>(</span><span class='hljl-nf'>Dense</span><span class='hljl-p'>(</span><span class='hljl-ni'>2</span><span class='hljl-p'>,</span><span class='hljl-ni'>2</span><span class='hljl-p'>))</span><span class='hljl-t'>
+</span><span class='hljl-n'>n_sde</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>NeuralDSDE</span><span class='hljl-p'>(</span><span class='hljl-n'>drift_dudt</span><span class='hljl-p'>,</span><span class='hljl-n'>diffusion_dudt</span><span class='hljl-p'>,</span><span class='hljl-n'>tspan</span><span class='hljl-p'>,</span><span class='hljl-nf'>SOSRI</span><span class='hljl-p'>(),</span><span class='hljl-n'>saveat</span><span class='hljl-oB'>=</span><span class='hljl-n'>t</span><span class='hljl-p'>,</span><span class='hljl-n'>reltol</span><span class='hljl-oB'>=</span><span class='hljl-nfB'>1e-1</span><span class='hljl-p'>,</span><span class='hljl-n'>abstol</span><span class='hljl-oB'>=</span><span class='hljl-nfB'>1e-1</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>ps</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>Flux</span><span class='hljl-oB'>.</span><span class='hljl-nf'>params</span><span class='hljl-p'>(</span><span class='hljl-n'>n_sde</span><span class='hljl-p'>)</span>
+</pre>
+
+
+<p>Let&#39;s picture what our untrained result is like:</p>
+
+
+
+<pre class='hljl'>
+<span class='hljl-n'>pred</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>n_sde</span><span class='hljl-p'>(</span><span class='hljl-n'>u0</span><span class='hljl-p'>)</span><span class='hljl-t'> </span><span class='hljl-cs'># Get the prediction using the correct initial condition</span><span class='hljl-t'>
+</span><span class='hljl-n'>p1</span><span class='hljl-p'>,</span><span class='hljl-n'>re1</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>Flux</span><span class='hljl-oB'>.</span><span class='hljl-nf'>destructure</span><span class='hljl-p'>(</span><span class='hljl-n'>drift_dudt</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>p2</span><span class='hljl-p'>,</span><span class='hljl-n'>re2</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>Flux</span><span class='hljl-oB'>.</span><span class='hljl-nf'>destructure</span><span class='hljl-p'>(</span><span class='hljl-n'>diffusion_dudt</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-nf'>drift_</span><span class='hljl-p'>(</span><span class='hljl-n'>u</span><span class='hljl-p'>,</span><span class='hljl-n'>p</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>)</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>re1</span><span class='hljl-p'>(</span><span class='hljl-n'>n_sde</span><span class='hljl-oB'>.</span><span class='hljl-n'>p</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-oB'>:</span><span class='hljl-n'>n_sde</span><span class='hljl-oB'>.</span><span class='hljl-n'>len</span><span class='hljl-p'>])(</span><span class='hljl-n'>u</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-nf'>diffusion_</span><span class='hljl-p'>(</span><span class='hljl-n'>u</span><span class='hljl-p'>,</span><span class='hljl-n'>p</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>)</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>re2</span><span class='hljl-p'>(</span><span class='hljl-n'>n_sde</span><span class='hljl-oB'>.</span><span class='hljl-n'>p</span><span class='hljl-p'>[(</span><span class='hljl-n'>n_sde</span><span class='hljl-oB'>.</span><span class='hljl-n'>len</span><span class='hljl-oB'>+</span><span class='hljl-ni'>1</span><span class='hljl-p'>)</span><span class='hljl-oB'>:</span><span class='hljl-k'>end</span><span class='hljl-p'>])(</span><span class='hljl-n'>u</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>nprob</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>SDEProblem</span><span class='hljl-p'>(</span><span class='hljl-n'>drift_</span><span class='hljl-p'>,</span><span class='hljl-n'>diffusion_</span><span class='hljl-p'>,</span><span class='hljl-n'>u0</span><span class='hljl-p'>,(</span><span class='hljl-nfB'>0.0f0</span><span class='hljl-p'>,</span><span class='hljl-nfB'>1.2f0</span><span class='hljl-p'>),</span><span class='hljl-n'>nothing</span><span class='hljl-p'>)</span><span class='hljl-t'>
+
+</span><span class='hljl-n'>ensemble_nprob</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>EnsembleProblem</span><span class='hljl-p'>(</span><span class='hljl-n'>nprob</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>ensemble_nsol</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>solve</span><span class='hljl-p'>(</span><span class='hljl-n'>ensemble_nprob</span><span class='hljl-p'>,</span><span class='hljl-nf'>SOSRI</span><span class='hljl-p'>(),</span><span class='hljl-n'>trajectories</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-ni'>100</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>saveat</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>t</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>ensemble_nsum</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>EnsembleSummary</span><span class='hljl-p'>(</span><span class='hljl-n'>ensemble_nsol</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>p1</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>plot</span><span class='hljl-p'>(</span><span class='hljl-n'>ensemble_nsum</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>title</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-s'>&quot;Neural SDE: Before Training&quot;</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-nf'>scatter!</span><span class='hljl-p'>(</span><span class='hljl-n'>p1</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>,</span><span class='hljl-n'>sde_data</span><span class='hljl-oB'>&#39;</span><span class='hljl-p'>,</span><span class='hljl-n'>lw</span><span class='hljl-oB'>=</span><span class='hljl-ni'>3</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-nf'>scatter</span><span class='hljl-p'>(</span><span class='hljl-n'>t</span><span class='hljl-p'>,</span><span class='hljl-n'>sde_data</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>,</span><span class='hljl-oB'>:</span><span class='hljl-p'>],</span><span class='hljl-n'>label</span><span class='hljl-oB'>=</span><span class='hljl-s'>&quot;data&quot;</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-nf'>scatter!</span><span class='hljl-p'>(</span><span class='hljl-n'>t</span><span class='hljl-p'>,</span><span class='hljl-n'>pred</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>,</span><span class='hljl-oB'>:</span><span class='hljl-p'>],</span><span class='hljl-n'>label</span><span class='hljl-oB'>=</span><span class='hljl-s'>&quot;prediction&quot;</span><span class='hljl-p'>)</span>
+</pre>
+
+
+<p>Now just like the neural ODE we build a training setup to monitor the results:</p>
+
+
+
+<pre class='hljl'>
+<span class='hljl-k'>function</span><span class='hljl-t'> </span><span class='hljl-nf'>predict_n_sde</span><span class='hljl-p'>()</span><span class='hljl-t'>
+  </span><span class='hljl-nf'>Array</span><span class='hljl-p'>(</span><span class='hljl-nf'>n_sde</span><span class='hljl-p'>(</span><span class='hljl-n'>u0</span><span class='hljl-p'>))</span><span class='hljl-t'>
+</span><span class='hljl-k'>end</span><span class='hljl-t'>
+</span><span class='hljl-k'>function</span><span class='hljl-t'> </span><span class='hljl-nf'>loss_n_sde</span><span class='hljl-p'>(;</span><span class='hljl-n'>n</span><span class='hljl-oB'>=</span><span class='hljl-ni'>100</span><span class='hljl-p'>)</span><span class='hljl-t'>
+  </span><span class='hljl-n'>samples</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-p'>[</span><span class='hljl-nf'>predict_n_sde</span><span class='hljl-p'>()</span><span class='hljl-t'> </span><span class='hljl-k'>for</span><span class='hljl-t'> </span><span class='hljl-n'>i</span><span class='hljl-t'> </span><span class='hljl-kp'>in</span><span class='hljl-t'> </span><span class='hljl-ni'>1</span><span class='hljl-oB'>:</span><span class='hljl-n'>n</span><span class='hljl-p'>]</span><span class='hljl-t'>
+  </span><span class='hljl-n'>means</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>reshape</span><span class='hljl-p'>(</span><span class='hljl-n'>mean</span><span class='hljl-oB'>.</span><span class='hljl-p'>([[</span><span class='hljl-n'>samples</span><span class='hljl-p'>[</span><span class='hljl-n'>i</span><span class='hljl-p'>][</span><span class='hljl-n'>j</span><span class='hljl-p'>]</span><span class='hljl-t'> </span><span class='hljl-k'>for</span><span class='hljl-t'> </span><span class='hljl-n'>i</span><span class='hljl-t'> </span><span class='hljl-kp'>in</span><span class='hljl-t'> </span><span class='hljl-ni'>1</span><span class='hljl-oB'>:</span><span class='hljl-nf'>length</span><span class='hljl-p'>(</span><span class='hljl-n'>samples</span><span class='hljl-p'>)]</span><span class='hljl-t'> </span><span class='hljl-k'>for</span><span class='hljl-t'> </span><span class='hljl-n'>j</span><span class='hljl-t'> </span><span class='hljl-kp'>in</span><span class='hljl-t'> </span><span class='hljl-ni'>1</span><span class='hljl-oB'>:</span><span class='hljl-nf'>length</span><span class='hljl-p'>(</span><span class='hljl-n'>samples</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>])]),</span><span class='hljl-nf'>size</span><span class='hljl-p'>(</span><span class='hljl-n'>samples</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>])</span><span class='hljl-oB'>...</span><span class='hljl-p'>)</span><span class='hljl-t'>
+  </span><span class='hljl-n'>vars</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>reshape</span><span class='hljl-p'>(</span><span class='hljl-n'>var</span><span class='hljl-oB'>.</span><span class='hljl-p'>([[</span><span class='hljl-n'>samples</span><span class='hljl-p'>[</span><span class='hljl-n'>i</span><span class='hljl-p'>][</span><span class='hljl-n'>j</span><span class='hljl-p'>]</span><span class='hljl-t'> </span><span class='hljl-k'>for</span><span class='hljl-t'> </span><span class='hljl-n'>i</span><span class='hljl-t'> </span><span class='hljl-kp'>in</span><span class='hljl-t'> </span><span class='hljl-ni'>1</span><span class='hljl-oB'>:</span><span class='hljl-nf'>length</span><span class='hljl-p'>(</span><span class='hljl-n'>samples</span><span class='hljl-p'>)]</span><span class='hljl-t'> </span><span class='hljl-k'>for</span><span class='hljl-t'> </span><span class='hljl-n'>j</span><span class='hljl-t'> </span><span class='hljl-kp'>in</span><span class='hljl-t'> </span><span class='hljl-ni'>1</span><span class='hljl-oB'>:</span><span class='hljl-nf'>length</span><span class='hljl-p'>(</span><span class='hljl-n'>samples</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>])]),</span><span class='hljl-nf'>size</span><span class='hljl-p'>(</span><span class='hljl-n'>samples</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>])</span><span class='hljl-oB'>...</span><span class='hljl-p'>)</span><span class='hljl-t'>
+  </span><span class='hljl-nf'>sum</span><span class='hljl-p'>(</span><span class='hljl-n'>abs2</span><span class='hljl-p'>,</span><span class='hljl-n'>sde_data</span><span class='hljl-t'> </span><span class='hljl-oB'>-</span><span class='hljl-t'> </span><span class='hljl-n'>means</span><span class='hljl-p'>)</span><span class='hljl-t'> </span><span class='hljl-oB'>+</span><span class='hljl-t'> </span><span class='hljl-nf'>sum</span><span class='hljl-p'>(</span><span class='hljl-n'>abs2</span><span class='hljl-p'>,</span><span class='hljl-n'>sde_data_vars</span><span class='hljl-t'> </span><span class='hljl-oB'>-</span><span class='hljl-t'> </span><span class='hljl-n'>vars</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-k'>end</span><span class='hljl-t'>
+
+</span><span class='hljl-n'>opt</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>ADAM</span><span class='hljl-p'>(</span><span class='hljl-nfB'>0.025</span><span class='hljl-p'>)</span><span class='hljl-t'>
+</span><span class='hljl-n'>iter</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-ni'>0</span><span class='hljl-t'>
+</span><span class='hljl-n'>cb</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-k'>function</span><span class='hljl-t'> </span><span class='hljl-p'>()</span><span class='hljl-t'> </span><span class='hljl-cs'>#callback function to observe training</span><span class='hljl-t'>
+  </span><span class='hljl-kd'>global</span><span class='hljl-t'> </span><span class='hljl-n'>iter</span><span class='hljl-t'>
+  </span><span class='hljl-k'>if</span><span class='hljl-t'> </span><span class='hljl-n'>iter</span><span class='hljl-oB'>%</span><span class='hljl-ni'>50</span><span class='hljl-t'> </span><span class='hljl-oB'>==</span><span class='hljl-t'> </span><span class='hljl-ni'>0</span><span class='hljl-t'>
+      </span><span class='hljl-n'>sample</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>predict_n_sde</span><span class='hljl-p'>()</span><span class='hljl-t'>
+      </span><span class='hljl-cs'># loss against current data</span><span class='hljl-t'>
+      </span><span class='hljl-nf'>display</span><span class='hljl-p'>(</span><span class='hljl-nf'>sum</span><span class='hljl-p'>(</span><span class='hljl-n'>abs2</span><span class='hljl-p'>,</span><span class='hljl-n'>sde_data</span><span class='hljl-t'> </span><span class='hljl-oB'>.-</span><span class='hljl-t'> </span><span class='hljl-n'>sample</span><span class='hljl-p'>))</span><span class='hljl-t'>
+      </span><span class='hljl-cs'># plot current prediction against data</span><span class='hljl-t'>
+      </span><span class='hljl-n'>pl</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-nf'>scatter</span><span class='hljl-p'>(</span><span class='hljl-n'>t</span><span class='hljl-p'>,</span><span class='hljl-n'>sde_data</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>,</span><span class='hljl-oB'>:</span><span class='hljl-p'>],</span><span class='hljl-n'>label</span><span class='hljl-oB'>=</span><span class='hljl-s'>&quot;data&quot;</span><span class='hljl-p'>)</span><span class='hljl-t'>
+      </span><span class='hljl-nf'>scatter!</span><span class='hljl-p'>(</span><span class='hljl-n'>pl</span><span class='hljl-p'>,</span><span class='hljl-n'>t</span><span class='hljl-p'>,</span><span class='hljl-n'>sample</span><span class='hljl-p'>[</span><span class='hljl-ni'>1</span><span class='hljl-p'>,</span><span class='hljl-oB'>:</span><span class='hljl-p'>],</span><span class='hljl-n'>label</span><span class='hljl-oB'>=</span><span class='hljl-s'>&quot;prediction&quot;</span><span class='hljl-p'>)</span><span class='hljl-t'>
+      </span><span class='hljl-nf'>display</span><span class='hljl-p'>(</span><span class='hljl-nf'>plot</span><span class='hljl-p'>(</span><span class='hljl-n'>pl</span><span class='hljl-p'>))</span><span class='hljl-t'>
+  </span><span class='hljl-k'>end</span><span class='hljl-t'>
+  </span><span class='hljl-n'>iter</span><span class='hljl-t'> </span><span class='hljl-oB'>+=</span><span class='hljl-t'> </span><span class='hljl-ni'>1</span><span class='hljl-t'>
+</span><span class='hljl-k'>end</span><span class='hljl-t'>
+
+</span><span class='hljl-cs'># Display the SDE with the initial parameter values.</span><span class='hljl-t'>
+</span><span class='hljl-nf'>cb</span><span class='hljl-p'>()</span>
+</pre>
+
+
+<p>Notice that we setup our loss function to take in <span class="math">$n$</span> trajectories to run. We will setup our training such that we first fit the mean well, then relax the variance terms:</p>
+
+
+
+<pre class='hljl'>
+<span class='hljl-n'>Flux</span><span class='hljl-oB'>.</span><span class='hljl-nf'>train!</span><span class='hljl-p'>(()</span><span class='hljl-oB'>-&gt;</span><span class='hljl-nf'>loss_n_sde</span><span class='hljl-p'>(</span><span class='hljl-n'>n</span><span class='hljl-oB'>=</span><span class='hljl-ni'>10</span><span class='hljl-p'>),</span><span class='hljl-t'> </span><span class='hljl-n'>ps</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>Iterators</span><span class='hljl-oB'>.</span><span class='hljl-nf'>repeated</span><span class='hljl-p'>((),</span><span class='hljl-t'> </span><span class='hljl-ni'>100</span><span class='hljl-p'>),</span><span class='hljl-t'> </span><span class='hljl-n'>opt</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>cb</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>cb</span><span class='hljl-p'>)</span>
+</pre>
+
+
+
+
+<pre class='hljl'>
+<span class='hljl-n'>iter</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-ni'>0</span><span class='hljl-t'> </span><span class='hljl-cs'># reset the counter</span><span class='hljl-t'>
+</span><span class='hljl-n'>Flux</span><span class='hljl-oB'>.</span><span class='hljl-nf'>train!</span><span class='hljl-p'>(</span><span class='hljl-n'>loss_n_sde</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>ps</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>Iterators</span><span class='hljl-oB'>.</span><span class='hljl-nf'>repeated</span><span class='hljl-p'>((),</span><span class='hljl-t'> </span><span class='hljl-ni'>100</span><span class='hljl-p'>),</span><span class='hljl-t'> </span><span class='hljl-n'>opt</span><span class='hljl-p'>,</span><span class='hljl-t'> </span><span class='hljl-n'>cb</span><span class='hljl-t'> </span><span class='hljl-oB'>=</span><span class='hljl-t'> </span><span class='hljl-n'>cb</span><span class='hljl-p'>)</span>
+</pre>
+
+
+<p>And there we go: a neural dynamical system that fits both the mean and variance of the timeseries data. Of course, there are a million other loss functions to explore, with millions of different properties. And universal stochastic differential equation structures. But we&#39;ll leave this for the reader&#33;</p>
+<h2>Linking SDEs to PDEs: Kolmogorov Forward Equation Derivation</h2>
+<p>The Kolmogorov Forward Equation, also known to Physicists as the Fokker-Planck Equation, is important because it describes the time evolution of the probability density function. Whereas the stochastic differential equation describes how one trajectory of the stochastic processes evolves, the Kolmogorov Forward Equation describes how, if you were to be running many different simulations of the trajectory, the percent of trajectories that are around a given value evolves with time.</p>
+<p>We will derive this for the arbitrary drift process:</p>
+<p class="math">\[
+dx=f(x)dt+\sum_{i=1}^{m}g_{i}(x)dW_{i}.
+\]</p>
+<p>Let <span class="math">$\psi(x)$</span> be an arbitrary time-independent transformation of <span class="math">$x$</span>. Applying Ito&#39;s lemma for an arbitrary function we get</p>
+<p class="math">\[
+d\psi(x,t)=\left(f(x,t)\frac{\partial\psi}{\partial x}+\frac{1}{2}\sum_{i=1}^{n}g_{i}^{2}(x,t)\frac{\partial^{2}\psi}{\partial x^{2}}\right)dt+\frac{\partial\psi}{\partial x}\sum_{i=1}^{n}g_{i}(x,t)dW_{i}
+\]</p>
+<p>Take the expectation of both sides. Because expectation is a linear operator, we can move it inside the derivative operator to get:</p>
+<p class="math">\[
+\frac{d}{dt}\mathbb{E}\left[\psi(x)\right]=\mathbb{E}\left[\frac{\partial\psi}{\partial x}f(x)\right]+\frac{1}{2}\mathbb{E}\left[\sum_{i=1}^{m}\frac{\partial^{2}\psi}{\partial x^{2}}g_{i}^{2}(x)\right].
+\]</p>
+<p>Notice that <span class="math">$\mathbb{E}\left[dW_{i}\right]=0$</span> and thus the differential Wiener terms dropped out.</p>
+<p>Recall the definition of expected value is</p>
+<p class="math">\[
+\mathbb{E}\left[\psi(x)\right]=\int_{-\infty}^{\infty}\rho(x,t)\psi(x)dx
+\]</p>
+<p>where <span class="math">$\rho(x,t)$</span> is the probability density of equaling <span class="math">$x$</span> at a time <span class="math">$t$</span>. Thus we get that the first term as:</p>
+<p class="math">\[
+\frac{d}{dt}\mathbb{E}\left[\psi(x)\right]=\int_{-\infty}^{\infty}\frac{\partial\rho}{\partial t}\psi(x)dx
+\]</p>
+<p>For the others, notice</p>
+<p class="math">\[
+\mathbb{E}\left[\frac{\partial\psi}{\partial x}f(x)\right]=\int_{-\infty}^{\infty}\rho(x,t)\frac{\partial\psi}{\partial x}f(x)dx.
+\]</p>
+<p>We rearrange terms doing integration by parts. Let <span class="math">$u=\rho f$</span> and <span class="math">$dv=\frac{\partial\psi}{\partial x}$</span>. Thus <span class="math">$du=\frac{\partial(\rho f)}{\partial x}$</span> and <span class="math">$v=\psi$</span>. Therefore we get that:</p>
+<p class="math">\[
+\mathbb{E}\left[\frac{\partial\psi}{\partial x}f(x)\right]=\left[\rho f\psi\right]_{-\infty}^{\infty}-\int_{-\infty}^{\infty}\frac{\partial(\rho f)}{\partial x}\psi(x)dx.
+\]</p>
+<p>In order for the probability distribution to be bounded &#40;which it must be: it must integrate to 1&#41;, <span class="math">$\rho$</span> must vanish at both infinities. Thus, assuming bounded expectation, <span class="math">$\mathbb{E}\left[\frac{\partial\psi}{\partial x}f(x)\right]<\infty$</span>, we get that</p>
+<p class="math">\[
+\mathbb{E}\left[\frac{\partial\psi}{\partial x}f(x)\right]=-\int_{-\infty}^{\infty}\frac{\partial(\rho f)}{\partial x}\psi(x)dx.
+\]</p>
+<p>The next term we manipulate similarly,</p>
+<p class="math">\[
+\begin{eqnarray*}
+\mathbb{E}\left[\frac{\partial\psi^{2}}{\partial x^{2}}g_{i}^{2}(x)\right] & = & \int_{-\infty}^{\infty}\frac{\partial^{2}\psi}{\partial x^{2}}g_{i}^{2}(x)\rho(x,t)dx\\
+ & = & \left[\rho g^{2}\frac{\partial\psi}{\partial x}\right]_{-\infty}^{\infty}-\int_{-\infty}^{\infty}\frac{\partial\left(g_{i}^{2}(x)\rho(x,t)\right)}{\partial x}\frac{\partial\psi}{\partial x}dx\\
+ & = & \left[\rho g^{2}\frac{\partial\psi}{\partial x}\right]_{-\infty}^{\infty}-\left[\frac{\partial\left(\rho g^{2}\right)}{\partial x}\psi\right]_{-\infty}^{\infty}+\frac{1}{2}\int_{-\infty}^{\infty}\frac{\partial^{2}\left(g_{i}^{2}(x)\rho(x,t)\right)}{\partial x^{2}}\psi(x)dx\\
+ & =\frac{1}{2} & \int_{-\infty}^{\infty}\frac{\partial^{2}\left(g_{i}^{2}(x)\rho(x,t)\right)}{\partial x^{2}}\psi(x)dx
+\end{eqnarray*}
+\]</p>
+<p>where we note that, at the edges, the derivative of <span class="math">$\rho$</span> converges to zero since <span class="math">$\rho$</span> converges to 0 and thus the constant terms vanish. Thus we get that</p>
+<p class="math">\[
+\int_{-\infty}^{\infty}\frac{\partial\rho}{\partial t}\psi(x)dx=-\int_{-\infty}^{\infty}\frac{\partial(\rho f)}{\partial x}\psi(x)dx+\frac{1}{2}\sum_{i}\int_{-\infty}^{\infty}\frac{\partial(g_{i}^{2}\rho)}{\partial x}\psi(x)dx
+\]</p>
+<p>which we can re-write as</p>
+<p class="math">\[
+\int_{-\infty}^{\infty}\left(\frac{\partial\rho}{\partial t}+\frac{\partial(\rho f)}{\partial x}-\frac{1}{2}\sum_{i}\frac{\partial(g_{i}^{2}\rho)}{\partial x}\right)\psi(x)dx=0.
+\]</p>
+<p>Since <span class="math">$\psi(x)$</span> is arbitrary, let <span class="math">$\psi(x)=I_{A}(x)$</span>, the indicator function for the set <span class="math">$A$</span>:</p>
+<p class="math">\[
+I_{A}(x)=\begin{cases}
+1, & x\in A\\
+0 & o.w.
+\end{cases}
+\]</p>
+<p>Thus we get that:</p>
+<p class="math">\[
+\int_{A}\left(\frac{\partial\rho}{\partial t}+\frac{\partial(\rho f)}{\partial x}-\frac{1}{2}\sum_{i}\frac{\partial(g_{i}^{2}\rho)}{\partial x}\right)dx=0
+\]</p>
+<p>for any arbitrary <span class="math">$A\subseteq\mathbb{R}$</span>. Notice that this implies that the integrand must be identically zero. Thus</p>
+<p class="math">\[
+\frac{\partial\rho}{\partial t}+\frac{\partial(\rho f)}{\partial x}-\frac{1}{2}\sum_{i}\frac{\partial(g_{i}^{2}\rho)}{\partial x}=0,
+\]</p>
+<p>which we re-arrange as</p>
+<p class="math">\[
+\frac{\partial\rho(x,t)}{\partial t}=-\frac{\partial}{\partial x}[f(x)\rho(x,t)]+\frac{1}{2}\sum_{i=1}^{m}\frac{\partial^{2}}{\partial x^{2}}\left[g_{i}^{2}(x)\rho(x,t)\right],
+\]</p>
+<p>which is the Forward Kolmogorov or the Fokker-Planck equation.</p>
+<h3>Example Application: Ornstein–Uhlenbeck Process</h3>
+<p>Consider the stochastic process:</p>
+<p class="math">\[
+dx=-xdt+dW_{t},
+\]</p>
+<p>where <span class="math">$W_{t}$</span> is Brownian motion. The Forward Kolmogorov Equation for this SDE is thus:</p>
+<p class="math">\[
+\frac{\partial\rho}{\partial t}=\frac{\partial}{\partial x}(x\rho)+\frac{1}{2}\frac{\partial^{2}}{\partial x^{2}}\rho(x,t)
+\]</p>
+<p>Assume that the initial conditions follow the distribution <span class="math">$u$</span> to give:</p>
+<p class="math">\[
+\rho(x,0)=u(x)
+\]</p>
+<p>and the boundary conditions are absorbing at infinity. To solve this PDE, let <span class="math">$y=xe^{t}$</span> and apply Ito&#39;s lemma</p>
+<p class="math">\[
+dy=xe^{t}dt+e^{t}dx=e^{t}dW
+\]</p>
+<p>and notice this follows has the Forward Kolmogorov Equation</p>
+<p class="math">\[
+\frac{\partial\rho}{\partial t}=\frac{e^{2t}}{2}\frac{\partial^{2}\rho}{\partial y^{2}}.
+\]</p>
+<p>which is a simple form of the Heat Equation. If <span class="math">$\rho(x,0)=\delta(x)$</span>, the Dirac-<span class="math">$\delta$</span> function, then we know this solves as a Gaussian with diffusion constant <span class="math">$\frac{e^{2t}}{2}$</span> to give us:</p>
+<p class="math">\[
+\rho(y,t)=\frac{1}{\sqrt{2\pi e^{2t}t}}e^{-\frac{y^{2}}{2e^{2t}t}}.
+\]</p>
+<p>and thus <span class="math">$y\sim N(0,e^{2t}t)$</span>.</p>
+<h3>The Two Way Meaning: Feynman-Kac Theorem</h3>
+<p>The derivation of the Kolmogorov equations is a two-way street. One way to solve a specific set of parabolic PDEs, the quasilinear diffusion-advection equations, is to solve a bunch of SDEs and look at the probability distributions. If 100 spatial points in each dimension were required for the correct accuracy, then it would take <span class="math">$(64 \times 100)^100$</span> bits, or</p>
+<p>https://www.wolframalpha.com/input/?i&#61;&#37;2864*100&#37;29&#37;5E100&#43;bits&#43;as&#43;terabytes</p>
+<p class="math">\[
+5 \times 10^367
+\]</p>
+<p>terabytes of memory&#33; However, just a system of 100 SDEs can be solved very easily. Exploiting this direction is known as the Feynman-Kac Theroem and it&#39;s commonly used in physical applications.</p>
+<p>Meanwhile, Monte Carlo methods can have slow convergence, so if you only have 3 SDEs, then it can be much faster to solve the diffusion-advection equations to get the probability distributions. This two sided view of parabolic PDEs, as both a local SDE or a global PDE, can be exploited for computational gains.</p>
+<h4>Side Note</h4>
+<p>Hyperbolic PDEs have a different relation, known as the Method of Characteristics, which turns global PDEs into local ODEs.</p>
+<h2>Terminal PDEs and Forward-Backwards SDEs</h2>
+<p>The downside of Feynman-Kac is that it only applies to a very specific set of PDEs: the quasilinear diffusion advection equation that we derived. However, what if we wanted to solve high dimensional PDEs of an expanded form? It turns out there is some theory that links more partial differential equations to SDEs.</p>
+<p>Consider the class of semilinear parabolic PDEs, in finite time <span class="math">$t\in[0, T]$</span> and <span class="math">$d$</span>-dimensional space <span class="math">$x\in\mathbb R^d$</span>, that have the form</p>
+<p class="math">\[
+\begin{align}
+  \frac{\partial u}{\partial t}(t,x) 	&+\frac{1}{2}\text{trace}\left(\sigma\sigma^{T}(t,x)\left(\text{Hess}_{x}u\right)(t,x)\right)\\
+	&+\nabla u(t,x)\cdot\mu(t,x) \\
+	&+f\left(t,x,u(t,x),\sigma^{T}(t,x)\nabla u(t,x)\right)=0,\end{align}
+\]</p>
+<p>with a terminal condition <span class="math">$u(T,x)=g(x)$</span>. In this equation, <span class="math">$\text{trace}$</span> is the trace of a matrix, <span class="math">$\sigma^T$</span> is the transpose of <span class="math">$\sigma$</span>, <span class="math">$\nabla u$</span> is the gradient of <span class="math">$u$</span>, and <span class="math">$\text{Hess}_x u$</span> is the Hessian of <span class="math">$u$</span> with respect to <span class="math">$x$</span>. Furthermore, <span class="math">$\mu$</span> is a vector-valued function, <span class="math">$\sigma$</span> is a <span class="math">$d \times d$</span> matrix-valued function and <span class="math">$f$</span> is a nonlinear function. We assume that <span class="math">$\mu$</span>, <span class="math">$\sigma$</span>, and <span class="math">$f$</span> are known.</p>
+<p>We wish to find the solution at initial time, <span class="math">$t=0$</span>, at some starting point, <span class="math">$x = \zeta$</span>.</p>
+<h3>Why the Terminal PDE?</h3>
+<p>A PDE where we only know the final value? This may sound contrived, but in reality this is a very natural PDE, because it turns out to be the general form of stochastic optimal control problems. So if you could solve it effectively, you could solve both determinsitic and stochastic optimal control in a very efficient way&#33;</p>
+<h4>Terminal PDEs in Finance and Economics</h4>
+<p>It turns out that there is a large class of problems in economics and finance that satisfy this form. The reason is because in these problems you may know the value of something at the end, when you&#39;re going to sell it, and you want to evaluate it right now. The classic example is in options pricing. An option is a contract to be able to solve a stock at a given value. The simplest case is a contract that can only be executed at a pre-determined time in the future. Let&#39;s say we have an option to sell a stock at 100 no matter what. This means that, if the stock at the strike time &#40;the time the option can be sold&#41; is 70, we will make 30 from this option, and thus the option itself is worth 30. The question is, if I have this option today, the strike time is 3 months in the future, and the stock price is currently 70, how much should I value the option <strong>today</strong>?</p>
+<p>To solve this, we need to put a model on how we think the stock price will evolve. One simple version is a linear stochastic differential equation, i.e. the stock price will evolve with a constant interest rate <span class="math">$r$</span> with some volitility &#40;randomness&#41; <span class="math">$\sigma$</span>, in which case:</p>
+<p class="math">\[
+dX_t = r X_t dt + \sigma X_t dW_t.
+\]</p>
+<p>From this model, we can evaluate the probability that the stock is going to be at given values, which then gives us the probability that the option is worth a given value, which then gives us the expected &#40;or average&#41; value of the option. This is the Black-Scholes problem. However, a more direct way of calculating this result is writing down a partial differential equation for the evolution of the value of the option <span class="math">$V$</span> as a function of time <span class="math">$t$</span> and the current stock price <span class="math">$x$</span>. At the final time point, if we know the stock price then we know the value of the option, and thus we have a terminal condition <span class="math">$V(T,x) = g(x)$</span> for some known value function <span class="math">$g(x)$</span>. The question is, given this value at time <span class="math">$T$</span>, what is the value of the option at time <span class="math">$t=0$</span> given that the stock currently has a value <span class="math">$x = \zeta$</span>. Why is this interesting? This will tell you what you think the option is currently valued at, and thus if it&#39;s cheaper than that, you can gain money by buying the option right now&#33; This means that the &quot;solution&quot; to the PDE is the value <span class="math">$V(0,\zeta)$</span>, where we know the final points <span class="math">$V(T,x) = g(x)$</span>.</p>
+<h4>Nonlinear Black-Scholes as a Semilinear Parabolic PDEs</h4>
+<p>Now let&#39;s look at a few applications which have PDEs that are solved by this method. One set of problems that are solved, given our setup, are Black-Scholes types of equations. Unless a lot of previous literature, this works for a wide class of nonlinear extensions to Black-Scholes with large portfolios. Here, the dimension of the PDE for <span class="math">$V(t,x)$</span> is the dimension of <span class="math">$x$</span>, where the dimension is the number of stocks in the portfolio that we want to consider. If we want to track 1000 stocks, this means our PDE is 1000 dimensional&#33; Traditional PDE solvers would need around <span class="math">$N^{1000}$</span> points evolving over time in order to arrive at the solution, which is completely impractical.</p>
+<p>One example of a nonlinear Black-Scholes equation in this form is the Black-Scholes equation with default risk. Here we are adding to the standard model the idea that the companies that we are buying stocks for can default, and thus our valuation has to take into account this default probability as the option will thus become value-less. The PDE that is arrived at is:</p>
+<p class="math">\[
+\frac{\partial u}{\partial t}(t,x) + \bar{\mu}\cdot \nabla u(t, x) + \frac{\bar{\sigma}^{2}}{2} \sum_{i=1}^{d} \left |x_{i}  \right |^{2} \frac{\partial^2 u}{\partial {x_{i}}^2}(t,x) \\ - (1 -\delta )Q(u(t,x))u(t,x) - Ru(t,x) = 0
+\]</p>
+<p>with terminating condition <span class="math">$g(x) = \min_{i} x_i$</span> for <span class="math">$x = (x_{1}, . . . , x_{100}) \in R^{100}$</span>, where <span class="math">$\delta \in [0, 1)$</span>, <span class="math">$R$</span> is the interest rate of the risk-free asset, and Q is a piecewise linear function of the current value with three regions <span class="math">$(v^{h} < v ^{l}, \gamma^{h} > \gamma^{l})$</span>,</p>
+<p class="math">\[
+\begin{align}
+Q(y) &= \mathbb{1}_{(-\infty,\upsilon^{h})}(y)\gamma ^{h}
++ \mathbb{1}_{[\upsilon^{l},\infty)}(y)\gamma ^{l}
+\\ &+ \mathbb{1}_{[\upsilon^{h},\upsilon^{l}]}(y)
+\left[ \frac{(\gamma ^{h} - \gamma ^{l})}{(\upsilon ^{h}- \upsilon ^{l})}
+(y - \upsilon ^{h}) + \gamma ^{h}  \right  ].
+\end{align}
+\]</p>
+<p>This PDE can be cast into the general PDE form by setting:</p>
+<p class="math">\[
+\begin{align}
+    \mu &= \overline{\mu} X_{t} \\
+    \sigma &= \overline{\sigma} \text{diag}(X_{t}) \\
+    f &= -(1 -\delta )Q(u(t,x))u(t,x) - R u(t,x)
+\end{align}
+\]</p>
+<h3>Stochastic Optimal Control as a Deep BSDE Application</h3>
+<p>Another type of problem that fits into this terminal PDE form is the <em>stochastic optimal control problem</em>. The problem is a generalized context to what motivated us before. In this case, there are a set of agents which undergo some known stochastic model. What we want to do is apply some control &#40;push them in some direction&#41; at every single timepoint towards some goal. For example, we have the physics for the dynamics of drone flight, but there&#39;s randomness in the wind condition, and so we want to control the engine speeds to move in a certain direction. However, there is a cost associated with controling, and thus the question is how to best balance the use of controls with the natural stochastic evolution.</p>
+<p>Formally, optimal control is defined finding a <span class="math">$u(t)$</span> such that for</p>
+<p class="math">\[
+X' = f(X,u,t)
+\]</p>
+<p>we minimize some objective. That is, <span class="math">$X$</span> satisfies some differential equation, <span class="math">$u$</span> can modify it, and we want to minimize some cost on the solution. In many cases this cost can include a penalty on &quot;using&quot; <span class="math">$u$</span>. For example, a cost for the amount of energy used when doing advanced drone maneuvers. Stochastic optimal control is the case where:</p>
+<p class="math">\[
+dX_t = f(X_t,u_t,t)dt + g(X_t,u_t,t)dW_t
+\]</p>
+<p>that is, the underlying driving process is a stochastic differential equation.</p>
+<p>We can represent the global solution to the optimal control as <span class="math">$u(t,x)$</span>, i.e. what should we be doing to the system at time <span class="math">$t$</span> if <span class="math">$X=x$</span>. It turns out this is in the same form as the Black-Scholes problem. There is a model evolving forwards, and when we get to the end we know how much everything  &quot;cost&quot; because we know if the drone got to the right location and how much energy it took. So in the same sense as Black-Scholes, we can know the value at the end and try and propogate it backwards given the current state of the system <span class="math">$x$</span>, to find out <span class="math">$u(0,\zeta)$</span>, i.e. how should we control right now given the current system is in the state <span class="math">$x = \zeta$</span>. It turns out that the solution of <span class="math">$u(t,x)$</span> where <span class="math">$u(T,x)=g(x)$</span> is given and we want to find <span class="math">$u(0,\zeta)$</span> is given by a partial differential equation which is known as the Hamilton-Jacobi-Bellman equation, which is one of these terminal PDEs that is representable by the parabolic PDE form above&#33;</p>
+<p>Take the classical linear-quadratic Gaussian &#40;LQG&#41; control problem in 100 dimensions</p>
+<p class="math">\[
+dX_t = 2\sqrt{\lambda} c_t dt + \sqrt{2} dW_t
+\]</p>
+<p>with <span class="math">$t\in [0,T]$</span>, <span class="math">$X_0 = x$</span>, and with a cost function</p>
+<p class="math">\[
+C(c_t) = \mathbb{E}\left[\int_0^T \Vert c_t \Vert^2 dt + g(X_t) \right]
+\]</p>
+<p>where <span class="math">$X_t$</span> is the state we wish to control, <span class="math">$\lambda$</span> is the strength of the control, and <span class="math">$c_t$</span> is the control process.  To minimize the control, the Hamilton–Jacobi–Bellman equation:</p>
+<p class="math">\[
+\frac{\partial u}{\partial t}(t,x) + \Delta u(t,x) - \lambda \Vert \nabla u(t,x) \Vert^2 = 0
+\]</p>
+<p>has a solution <span class="math">$u(t,x)$</span> which at <span class="math">$t=0$</span> represents the optimal cost of starting from <span class="math">$x$</span>.</p>
+<p>This PDE can be rewritten into the canonical form of \Cref&#123;pdeform&#125; by setting:</p>
+<p class="math">\[
+\begin{align}
+    \mu &= 0, \\
+    \sigma &= \overline{\sigma} I, \\
+    f &= -\alpha \left \| \sigma^T(s,X_s)\nabla u(s,X_s)) \right \|^{2},
+\end{align}
+\]</p>
+<p>where <span class="math">$\overline{\sigma} = \sqrt{2}$</span>, T &#61; 1 and <span class="math">$X_0 = (0,. . . , 0) \in R^{100}$</span>.</p>
+<h3>Solving Semilinear Parabolic PDEs with Universal Stochastic Differential Equations</h3>
+<p>Consider the class of semilinear parabolic PDEs, in finite time <span class="math">$t\in[0, T]$</span> and <span class="math">$d$</span>-dimensional space <span class="math">$x\in\mathbb R^d$</span>, that have the form</p>
+<p class="math">\[
+\begin{align}
+  \frac{\partial u}{\partial t}(t,x) 	&+\frac{1}{2}\text{trace}\left(\sigma\sigma^{T}(t,x)\left(\text{Hess}_{x}u\right)(t,x)\right)\\
+	&+\nabla u(t,x)\cdot\mu(t,x) \\
+	&+f\left(t,x,u(t,x),\sigma^{T}(t,x)\nabla u(t,x)\right)=0,\end{align}
+\]</p>
+<p>with a terminal condition <span class="math">$u(T,x)=g(x)$</span>. Let <span class="math">$W_{t}$</span> be a Brownian motion and take <span class="math">$X_t$</span> to be the solution to the stochastic differential equation</p>
+<p class="math">\[
+dX_t = \mu(t,X_t) dt + \sigma (t,X_t) dW_t
+\]</p>
+<p>with initial condition <span class="math">$X(0)=\zeta$</span>. We know from our derivation above that, if everything was linear &#40;and <span class="math">$f=0$</span>&#41;, then the PDE is locally represented by the SDE of <span class="math">$X(t)$</span>. However, some smart people have recognized that, while this form cannot be represented as the SDE <span class="math">$X(t)$</span>, it can be represented by augmenting the SDE <span class="math">$X(t)$</span> with an extra term defined in reverse, known as the backwards SDE or BSDE:</p>
+<p class="math">\[
+\begin{align}
+u(t, &X_t) - u(0,\zeta) = \\
+& -\int_0^t f(s,X_s,u(s,X_s),\sigma^T(s,X_s)\nabla u(s,X_s)) ds \\
+& + \int_0^t \left[\nabla u(s,X_s) \right]^T \sigma (s,X_s) dW_s,\end{align}
+\]</p>
+<p>with terminating condition <span class="math">$g(X_T) = u(X_T,W_T)$</span>. Note that this <span class="math">$W_s$</span> is the same Brownian motion as the forward process. Indeed it makes sense given the example problems since the control <span class="math">$u(t)$</span> should be dependent on &quot;the current randomness&quot;</p>
+<p>Notice that we can put these terms together with the forward SDE to get what&#39;s known as the forward-backward SDE &#40;FBSDE&#41;:</p>
+<p class="math">\[
+\begin{aligned}
+dX_t =& \mu(t,X_t) dt + \sigma (t,X_t) dW_t,\\
+dU_t =& f(t,X_t,U_t,\sigma^T (t,X_t) \nabla u(t,X_t)) dt\\
+&+ \left[\sigma^T (t,X_t) \nabla u(t,X_t)\right]^T dW_t,\end{aligned}
+\]</p>
+<p>However, we don&#39;t know what <span class="math">$\sigma^T (t,X_t) \nabla u(t,X_t)$</span> is without solving or repsenting the PDE&#33; Also, since the <span class="math">$u(t)$</span> term is ran in reverse, we know its final condition &#40;if we know the final X&#40;t&#41; value&#33;&#41;, but we don&#39;t know its initial condition&#33; So to handle this, let&#39;s represent everything that we don&#39;t know with neural networks, i.e.</p>
+<p class="math">\[
+\begin{align}
+dX_t &= \mu(t,X_t) dt + \sigma (t,X_t) dW_t,\\
+dU_t &= f(t,X_t,U_t,U^1_{\theta_1}(t,X_t)) dt + \left[U^1_{\theta_1}(t,X_t)\right]^T dW_t,\end{align}
+\]</p>
+<p>where <span class="math">$U^1$</span> is some universal approximator and <span class="math">$u(0,X_0) = U^2(X_0)$</span> is some other universal approximator.</p>
+<p>How do we train these universal approximators? Well, we need to make sure the terminating condition holds, i.e. <span class="math">$g(X_T) = u(X_T,W_T)$</span>, and thus we make our cost be the difference of these values:</p>
+<p class="math">\[
+C(\theta) = E\left[g(X_t) - u(X_T,W_T)\right]
+\]</p>
+<p>which means we solve the FBSDE a few times and check on average how the terminating condition is doing. If our parameters start to cause the terminating condition to &quot;essentially&quot; hold, then <span class="math">$U^1 \approx \sigma^T (t,X_t) \nabla u(t,X_t)$</span> and <span class="math">$U^2 \approx u(0,X_0)$</span>, and thus we know the solution to the FBSDE.</p>
+<p>But what about the PDE? The goal was to find the solution at initial time, <span class="math">$t=0$</span> with some starting point, <span class="math">$X_0 = \zeta$</span>. Therefore the solution to the terminal PDE, after training the neural networks, is simply <span class="math">$U^2(X_0)$</span>&#33;</p>
+<h3>Universal SDE Solving Semilinear Parabolic PDEs</h3>
+<p>Example codes for doing this can be found in <a href="https://github.com/JuliaDiffEq/NeuralNetDiffEq.jl">NeuralNetDiffEq.jl</a>.</p>
+
+
+
+          <HR/>
+          <div class="footer"><p>
+          Published from <a href="sdes.jmd">sdes.jmd</a> using
+          <a href="http://github.com/mpastell/Weave.jl">Weave.jl</a>
+           on 2020-01-27.
+          <p></div>
+
+
+        </div>
+      </div>
+    </div>
+  </BODY>
+</HTML>
