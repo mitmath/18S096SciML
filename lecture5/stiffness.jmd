@@ -611,7 +611,9 @@ $u(x_{j},t^{n})=u_{j}^{n}$, and then we get
 
 $$e_{i}^{n+1}=e_{i}^{n}+\mu\left(e_{i+1}^{n}-2e_{i}^{n}+e_{i-1}^{n}\right)+\Delta t\tau_{i}^{n}$$
 
-where
+where:
+
+$$\mu = \frac{\Delta t}{\Delta x^2}$$
 
 $$\tau_{i}^{n}\sim\mathcal{O}(\Delta t)+\mathcal{O}(\Delta x^{2})$$.
 
@@ -633,7 +635,7 @@ $$u^{\prime}=Au$$
 
 where A is the matrix $\left[\mu,1-2\mu,\mu\right].$
 
-But  finding the maximum eigenvalue is non-trivial. But for linear PDEs, one
+But finding the maximum eigenvalue is non-trivial. But for linear PDEs, one
 nice way to analyze the stability directly is to use the Fourier mode
 decomposition. This is known as Van Neumann stability analysis. To do this,
 decompose $U$ into the Fourier modes:
@@ -678,9 +680,10 @@ $$\left|G\right|\leq1,$$
 
 which means
 
-$$-1\leq1-4\mu\sin^{2}\left(\frac{k\Delta x}{2}\right)\leq1 \mu>0$$
+$$-1\leq1-4\mu\sin^{2}\left(\frac{k\Delta x}{2}\right)\leq1
 
-and so $\leq1$ is simple. Since $\sin^{2}(x)\leq1$, then we can simplify this to
+since $\mu>0$ (since $\Delta t>0$ and $\Delta x > 0$) and so $\leq1$ is simple.
+Since $\sin^{2}(x)\leq1$, then we can simplify this to
 
 $$-1\leq1-4\mu$$
 

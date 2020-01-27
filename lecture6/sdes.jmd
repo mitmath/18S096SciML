@@ -118,7 +118,7 @@ Thus $x(t)$ is distributed as what is known as the log-normal distribution.
 
 ### Example Numerical Solution of Geometric Brownian Motion
 
-```julia;eval=false
+```julia
 using StochasticDiffEq, Plots
 p = (μ=1.0,σ=1.0)
 f(u,p,t) = p.μ*u
@@ -130,7 +130,7 @@ plot(sol)
 
 and automatic parallelism of the solution:
 
-```julia;eval=false
+```julia
 using DiffEqBase.EnsembleAnalysis
 enprob = EnsembleProblem(prob)
 # Note: Automatically parallel! Try on the GPU with EnsembleGPUArray() from DiffEqGPU.jl!
@@ -156,7 +156,7 @@ $$du_t = Au^3dt + 0.2dW_t$$
 with diagonal noise (i.e., it's a system of equations, but each equation has
 its own noise term).
 
-```julia;eval=false
+```julia
 using Flux, DiffEqFlux, StochasticDiffEq, Plots, DiffEqBase.EnsembleAnalysis
 
 u0 = Float32[2.; 0.]
@@ -177,7 +177,7 @@ prob = SDEProblem(trueSDEfunc,true_noise_func,u0,tspan)
 
 Our dataset will be the means and variances from 100,000 runs:
 
-```julia;eval=false
+```julia
 # Take a typical sample from the mean
 ensemble_prob = EnsembleProblem(prob)
 ensemble_sol = solve(ensemble_prob,SOSRI(),trajectories = 10000)
@@ -192,7 +192,7 @@ $$dX_t = f(X_t,t)dt + g(X_t,t)dW_t$$
 we will specify both $f$ and $g$ as neural networks, but define the noise term
 $g$ to be diagonal noise, matching the data generation process.
 
-```julia;eval=false
+```julia
 drift_dudt = Chain(x -> x.^3,
              Dense(2,50,tanh),
              Dense(50,2))
@@ -203,7 +203,7 @@ ps = Flux.params(n_sde)
 
 Let's picture what our untrained result is like:
 
-```julia;eval=false
+```julia
 pred = n_sde(u0) # Get the prediction using the correct initial condition
 p1,re1 = Flux.destructure(drift_dudt)
 p2,re2 = Flux.destructure(diffusion_dudt)
@@ -222,7 +222,7 @@ scatter!(t,pred[1,:],label="prediction")
 
 Now just like the neural ODE we build a training setup to monitor the results:
 
-```julia;eval=false
+```julia
 function predict_n_sde()
   Array(n_sde(u0))
 end
@@ -257,11 +257,11 @@ Notice that we setup our loss function to take in $n$ trajectories to run. We wi
 setup our training such that we first fit the mean well, then relax the variance
 terms:
 
-```julia;eval=false
+```julia
 Flux.train!(()->loss_n_sde(n=10), ps, Iterators.repeated((), 100), opt, cb = cb)
 ```
 
-```julia;eval=false
+```julia
 iter = 0 # reset the counter
 Flux.train!(loss_n_sde, ps, Iterators.repeated((), 100), opt, cb = cb)
 ```
