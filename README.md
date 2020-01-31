@@ -280,3 +280,22 @@ practical way of representing the forward-backward stochastic differential equat
 and solve the general control problem, which gives rise to a provably optimal
 neural network method for controlling drones, financial markets, etc. given some
 underlying model.
+
+## Lecture 7: A Quick Introduction to AD for Scientists
+
+#### Lecture Notes
+
+- [A Quick Introduction to AD for Scientists](https://mitmath.github.io/18S096SciML/lecture7/ad)
+
+#### Summary
+
+Automatic differentiation is a huge subject. This quick lecture dives into the
+main points:
+
+- What is automatic differentiation?
+- When is it useful?
+- How do you choose between forward and reverse?
+
+and describes AD in a fashion that should help a package user understand why
+they might have errors and how to handle using AD in a differentiable programming
+context.

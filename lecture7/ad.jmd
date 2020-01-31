@@ -1,0 +1,105 @@
+---
+title: A Quick Introduction to AD for Scientists
+author: Chris Rackauckas
+date: January 18th, 2020
+---
+
+There is a whole lot that can be said about "the right way" to compute the
+derivative of a program's output with respect to its input. If you don't believe
+me, go see the [18.337 Lecture Notes!](https://github.com/mitmath/18337). However,
+in some sense that can be information overload for practitioners: there's a lot
+of interesting mathematical and computational questions library developers are
+still discussing, but **as user, what do you actually need to know in order to
+effectively use automatic differentiation?** That is the point of this set of
+notes.
+
+## Forward-Mode AD As A Direct Alternative to Numerical Differentiation
+
+Let's say we wanted to just calculate a derivative.
+
+$$\frac{f(x+\epsilon)-f(x)}{\epsilon}$$
+
+with a small enough $\epsilon$. What's a small enough $\epsilon$? That's actually
+a very hard question, since **if $\epsilon$ is small you introduction floating
+point error, but if $\epsilon$ is large you introduce discretization error**.
+
+![](http://degenerateconic.com/wp-content/uploads/2014/11/complex_step1.png)
+
+It turns out the somewhat optimal value is around 1e-8 for Float64 and 1e-4 for
+Float32. With Float64 you generally do not get better than 1e-6 error on your
+derivative, and no better than 1e-3 for Float32. This is not only an issue for
+accuracy, but also an issue for performance. If you were using this derivative
+to do optimization, like gradient descent, being incorrect in the third decimal
+will mean that you will need more steps to convergence, and ultimately more
+calculations. Also, this calculation takes two calls to $f$. Can we do better?
+
+Well, if $f$ was $\sin$, then we would know that $f'$ is $\cos$. So if we saw
+in our program that $f$ was $\sin$, would could in theory automatically replace
+it with the program for $\cos$. Now what if we had $f(x) = \exp(\sin(x))$? Then
+by the chain rule we can know program to automatically replace with this as well!
+**Automatic differentiation is the process of building a program for the derivative**
+and using that to calculate the derivative. If you do this, your derivatives are
+"exact". Also, there are many optimizations that can occur if you know the program
+for the value and its derivative and run them simultaniously.
+
+Forward-mode automatic differentiation is the analogue to numerical differentiation
+but doing this program transformation approach. What you do is you define a new
+number type, the Dual number, $x + D v$ where $D$ is a dimensional
+construct, like $i$ for imaginary numbers. The rule for a Dual number is simplyD
+$f(x + D v) = f(x) + f'(x)v$, i.e. the first time carries forward the
+value of the program while the second term pushes forward the derivative by the
+chain rule. $f'$ is then an automatically generated program.
+
+## The Issue of Jacobians: Columns for Forward-Mode and Rows for Reverse-Mode
+
+Now let $f$ be a vector-valued function, i.e. $x$ is a vector and $f(x)$ is a
+vector. If that's the case, $f'(x)$, is the total derivative, i.e. the Jacobian
+and $f'(x) = [\frac{\partial f_i}{\partial x_j}]$. In this case, numerical
+differentiation of your program, i.e.
+
+$$\frac{f(x+\epsilon e_i)-f(x)}{\epsilon}$$
+
+calculates the $i$th column of the Jacobian where $e_i$ is the vector of all
+zeros but 1 at the $i$th point (the $i$th basis vector). Forward-mode automatic
+differentiation is then exactly the same, where $f(x + D v) = f(x) + f'(x)v$
+is always pushing forward Jacobians, and then forward-mode AD calculates columns
+of Jacobians at a time. But now, which column is computed is dependent on the
+choice of $v$. $f(x + De_i)$ will calulate the $i$th column. So we cna now create
+a larger dual number with more dimensions, i.e.
+$f(x + D_1 e_1 + \ldots + D_n e_n) = f(x) + D_1 f'(x)e_1 + \ldots + D_n f'(x)e_n$
+will compuate the whole Jacobian in one call to $f$ if we can generate a new
+version of our program that works on these large dual numbers / dual vectors!
+
+However, since $f'(x) = [\frac{\partial f_i}{\partial x_j}]$, one might notice
+that the rows of this Jacobian are the gradients. So **if you wanted to do gradient
+descent, then you want to calculate rows of Jacobians**. Calculating the full
+Jacobian column-by-column just to get a row isn't a good idea, right? Especialy
+if it's a single row Jacobian, which is the case for an $R^n \rightarrow R$
+function, i.e. a cost function. Thus in this case, what you can do is understand
+globally the whole program, for example building a tape of how it runs forwards,
+and reverse the chain rule calculation. It turns out that if you do this you
+arrive at reverse-mode AD which calculates Jacobians 1 row at a time. It has a
+lot more overhead, but if what you needed was a row of a Jacobian (a gradient),
+then it can be much quicker.
+
+## A Summary of AD For Scientists
+
+The summary is then as follows:
+
+- Numerical differentiation always works, but has overhead and issues with accuracy
+- Automatic differentiation requires doing a program transformation in order to
+  work, but if it can be done it'll be quicker and more accurate. This means it
+  usually has some restrictions, like everything has to be in one language or
+  you have to hardcode some derivatives for it to work. If AD fails for you,
+  that means it probably couldn't do the program transformation and you should
+  figure out why (i.e., maybe it doesn't know how to transform your call to C!)
+- Forward-mode automatic differentiation has little to no overhead (when
+  implemented properly), while reverse-mode automatic differentiation always
+  has a bit more overhead. However, forward-mode computes columns of Jacobians
+  at a time, while reverse-mode computes rows (gradients) in a single go. So if
+  you have an $R^n \rightarrow R^m$ function and want the whole Jacobian, forward
+  mode is faster unless $n$ is much larger than $m$ (generally we see it should be
+  100x as larger).
+- Reverse-mode AD is then quicker for forward-mode AD for gradients, and that's
+  a special case of the above where a gradient is really just a Jacobian of
+  an $R^n \rightarrow R$ function!
