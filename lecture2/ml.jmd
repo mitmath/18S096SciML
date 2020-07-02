@@ -83,7 +83,7 @@ would do:
 ]activate MLTest
 ```
 
-Notice that this will create a folder in your current directly for oyur project.
+Notice that this will create a folder in your current directly for your project.
 In this we will now add a few packages, for example:
 
 ```julia;eval=false
@@ -169,7 +169,7 @@ using Flux
 NN2 = Chain(Dense(10,32,tanh),
            Dense(32,32,tanh),
            Dense(32,5))
-NN(rand(10))
+NN2(rand(10))
 ```
 
 Notice that Flux.jl as a library is written in pure Julia, which means that every
@@ -185,7 +185,7 @@ to replace it by something like the quadratic function, we can just use an
 NN3 = Chain(Dense(10,32,x->x^2),
             Dense(32,32,x->max(0,x)),
             Dense(32,5))
-NN(rand(10))
+NN3(rand(10))
 ```
 
 The second activation function there is what's known as a `relu`. A `relu` can
