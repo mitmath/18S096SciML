@@ -153,6 +153,7 @@ A brief overview of the topics is as follows:
 
 - [The Essential Tools of Scientific Machine Learning](http://www.stochasticlifestyle.com/the-essential-tools-of-scientific-machine-learning-scientific-ml/)
 - [Workshop videos on Scientific Machine Learning](https://icerm.brown.edu/events/ht19-1-sml/)
+- [SciML Scientific Machine Learning Software Organization](https://sciml.ai/)
 
 #### Summary
 
@@ -208,6 +209,7 @@ fitting parameters in a differential equation.
 - [DiffEqFlux.jl README](https://github.com/JuliaDiffEq/DiffEqFlux.jl)
 - [DiffEqFlux Blog Post](https://julialang.org/blog/2019/01/fluxdiffeq)
 - [Essential Tools of Scientific Machine Learning](https://www.stochasticlifestyle.com/the-essential-tools-of-scientific-machine-learning-scientific-ml/)
+- [Universal Differential Equations for Scientific Machine Learning](https://arxiv.org/abs/2001.04385)
 
 ##### Summary
 
