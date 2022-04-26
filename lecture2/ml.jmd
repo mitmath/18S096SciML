@@ -7,7 +7,7 @@ date: January 6th, 2020
 Let's start by discussing how to use Julia for machine learning from the
 context of scientific machine learning. The core of machine learning is the
 Universal Approximation Theroem (UAT) which states that any sufficiently nice
-function can be approximated by a sufficiently large nueral network. Since this
+function can be approximated by a sufficiently large neural network. Since this
 is what we will be looking at in practice, let's get started with training
 neural networks to match functions instead of data.
 

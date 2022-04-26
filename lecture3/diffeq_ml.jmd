@@ -223,7 +223,7 @@ augmented_data = vcat(ode_data,zeros(1,size(ode_data,2)))
 
 ### The Universal Ordinary Differential Equation
 
-This formulation of the nueral differential equation in terms of a "knowledge-embedded"
+This formulation of the neural differential equation in terms of a "knowledge-embedded"
 structure is leading. If we already knew something about the differential equation,
 could we use that information in the differential equation definition itself?
 This leads us to the idea of the universal differential equation, which is a
